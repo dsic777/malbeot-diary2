@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     USE_REDIS: bool = False
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    # OpenAI
-    OPENAI_API_KEY: str = ""
+    # Anthropic (Claude API)
+    ANTHROPIC_API_KEY: str = ""
 
     # Azure 음성 (STT/TTS)
     AZURE_SPEECH_KEY: str = ""
