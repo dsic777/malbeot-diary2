@@ -7,7 +7,8 @@ uvicorn[standard]==0.32.1
 python-multipart==0.0.12
 
 # Database
-sqlalchemy==2.0.36
+sqlalchemy==2.0.48
+greenlet>=3.3.2
 alembic==1.14.0
 aiosqlite==0.20.0          # 개발용 (SQLite)
 # asyncpg==0.30.0          # 운영용 (PostgreSQL) — 배포 시 주석 해제
