@@ -1,0 +1,27 @@
+# Python 가상환경
+backend/myEnv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+
+# Python DB
+backend/*.db
+backend/*.sqlite3
+
+# 환경변수 (보안)
+.env
+backend/.env
+frontend/.env
+
+# React / Node
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# 작업 메모 (README.md 제외한 모든 md)
+*.md
+!README.md
+
+# OS
+.DS_Store
+Thumbs.db

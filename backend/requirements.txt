@@ -1,0 +1,36 @@
+# Python 3.14
+# 말벗이 내 손 안에 — backend 패키지 목록
+
+# Core
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+
+# Database
+sqlalchemy==2.0.36
+alembic==1.14.0
+aiosqlite==0.20.0          # 개발용 (SQLite)
+# asyncpg==0.30.0          # 운영용 (PostgreSQL) — 배포 시 주석 해제
+
+# Auth / JWT
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# AI
+openai==1.57.2
+
+# 음성 STT/TTS
+azure-cognitiveservices-speech>=1.48.2
+
+# 알림 스케줄러
+apscheduler==3.10.4
+
+# Cache
+redis==5.2.1
+
+# Env / Settings
+python-dotenv==1.0.1
+pydantic-settings>=2.13.1
+
+# HTTP Client
+httpx==0.27.2
