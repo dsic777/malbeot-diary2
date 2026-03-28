@@ -18,10 +18,6 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
-# 작업 메모 (README.md 제외한 모든 md)
-*.md
-!README.md
-
 # 임시 텍스트 파일 (requirements.txt 제외)
 *.txt
 !**/requirements*.txt
