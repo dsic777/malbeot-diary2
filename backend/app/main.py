@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import engine, Base
+from app.api.v1.router import api_router
 import app.models  # 모델 등록 — DB 테이블 자동 생성을 위해 필요
 
 logging.basicConfig(
@@ -41,11 +42,9 @@ app.add_middleware(
 )
 
 
+app.include_router(api_router, prefix="/api/v1")
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "말벗이 내 손 안에"}
-
-
-# 라우터는 모델/API 작성 후 순서대로 추가 예정
-# from app.api.v1.router import api_router
-# app.include_router(api_router, prefix="/api/v1")
