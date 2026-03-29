@@ -70,7 +70,8 @@ const PERSONA_ICON = { empathy: '🤗', advice: '💡', custom: '✏️' }
 
 export default function DiaryWritePage() {
   const navigate = useNavigate()
-  const today = new Date().toISOString().slice(0, 10)
+  const _d = new Date()
+  const today = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`
   const [form, setForm] = useState({
     title: '', content: '', emotion: '평온', weather: '맑음',
     diary_date: today, input_type: 'text', persona_id: null,
