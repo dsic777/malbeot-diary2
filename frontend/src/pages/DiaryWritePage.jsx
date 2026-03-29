@@ -201,7 +201,7 @@ export default function DiaryWritePage() {
   const [aiFeedback, setAiFeedback] = useState('')
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
-  const processedCountRef = useRef(0)
+  const sessionFinalRef = useRef('')
   const { enabled, speaking, speak, toggle } = useTTS()
 
   // 페이지 떠날 때 TTS 중단
@@ -221,7 +221,7 @@ export default function DiaryWritePage() {
       return
     }
     setVoiceTarget(target)
-    processedCountRef.current = 0
+    sessionFinalRef.current = ''
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
     recognition.continuous = true
@@ -229,25 +229,27 @@ export default function DiaryWritePage() {
 
     recognition.onstart = () => { setIsListening(true); setVoiceStatus('듣고 있어요... 🎤') }
     recognition.onresult = (event) => {
-      let interim = '', newFinal = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (i < processedCountRef.current) continue
-        if (event.results[i].isFinal) {
-          newFinal += event.results[i][0].transcript
-          processedCountRef.current = i + 1
-        } else {
-          interim += event.results[i][0].transcript
-        }
+      // 세션 전체 final 텍스트 수집 (Android 재시작 시 resultIndex가 0으로 리셋되므로 전체 순회)
+      let allFinal = ''
+      let interim = ''
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) allFinal += event.results[i][0].transcript
+        else interim += event.results[i][0].transcript
       }
-      if (newFinal) {
-        if (target === 'title') {
-          setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + newFinal }))
-        } else {
-          setForm((prev) => ({
-            ...prev,
-            content: prev.content + (prev.content ? ' ' : '') + newFinal,
-            input_type: 'voice',
-          }))
+      // 이전에 처리한 것보다 새로 늘어난 부분만 추가
+      if (allFinal.length > sessionFinalRef.current.length) {
+        const newPart = allFinal.slice(sessionFinalRef.current.length).trim()
+        sessionFinalRef.current = allFinal
+        if (newPart) {
+          if (target === 'title') {
+            setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + newPart }))
+          } else {
+            setForm((prev) => ({
+              ...prev,
+              content: prev.content + (prev.content ? ' ' : '') + newPart,
+              input_type: 'voice',
+            }))
+          }
         }
       }
       if (interim) setVoiceStatus(`인식 중: ${interim}`)
