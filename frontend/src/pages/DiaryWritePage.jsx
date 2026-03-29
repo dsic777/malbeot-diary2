@@ -194,12 +194,14 @@ export default function DiaryWritePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isListening, setIsListening] = useState(false)
+  const [voiceTarget, setVoiceTarget] = useState('content') // 'title' | 'content'
   const [voiceStatus, setVoiceStatus] = useState('')
   const [savedDiary, setSavedDiary] = useState(null)
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [aiFeedback, setAiFeedback] = useState('')
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
+  const processedCountRef = useRef(0)
   const { enabled, speaking, speak, toggle } = useTTS()
 
   // 페이지 떠날 때 TTS 중단
@@ -212,12 +214,14 @@ export default function DiaryWritePage() {
     api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
 
-  const startVoice = () => {
+  const startVoice = (target = 'content') => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       setVoiceStatus('크롬 브라우저를 사용해주세요.')
       return
     }
+    setVoiceTarget(target)
+    processedCountRef.current = 0
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
     recognition.continuous = true
@@ -225,17 +229,26 @@ export default function DiaryWritePage() {
 
     recognition.onstart = () => { setIsListening(true); setVoiceStatus('듣고 있어요... 🎤') }
     recognition.onresult = (event) => {
-      let interim = '', final = ''
+      let interim = '', newFinal = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) final += event.results[i][0].transcript
-        else interim += event.results[i][0].transcript
+        if (i < processedCountRef.current) continue
+        if (event.results[i].isFinal) {
+          newFinal += event.results[i][0].transcript
+          processedCountRef.current = i + 1
+        } else {
+          interim += event.results[i][0].transcript
+        }
       }
-      if (final) {
-        setForm((prev) => ({
-          ...prev,
-          content: prev.content + (prev.content ? ' ' : '') + final,
-          input_type: 'voice',
-        }))
+      if (newFinal) {
+        if (target === 'title') {
+          setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + newFinal }))
+        } else {
+          setForm((prev) => ({
+            ...prev,
+            content: prev.content + (prev.content ? ' ' : '') + newFinal,
+            input_type: 'voice',
+          }))
+        }
       }
       if (interim) setVoiceStatus(`인식 중: ${interim}`)
     }
@@ -366,7 +379,16 @@ export default function DiaryWritePage() {
 
         {/* 제목 */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500 font-bold text-sm">제목 (선택)</label>
+          <div className="flex items-center justify-between">
+            <label className="text-gray-500 font-bold text-sm">제목 (선택)</label>
+            <button type="button"
+              onClick={() => isListening && voiceTarget === 'title' ? stopVoice() : startVoice('title')}
+              className={`px-3 py-1 rounded-md text-sm font-black transition
+                ${isListening && voiceTarget === 'title' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
+            >
+              🎤 {isListening && voiceTarget === 'title' ? '중지' : '말로 쓰기'}
+            </button>
+          </div>
           <input
             type="text"
             value={form.title}
@@ -429,11 +451,11 @@ export default function DiaryWritePage() {
         <div className="flex flex-col gap-2 flex-1">
           <div className="flex items-center justify-between">
             <label className="text-gray-500 font-bold text-sm">오늘의 이야기 <span className="text-red-500">*</span></label>
-            <button type="button" onClick={isListening ? stopVoice : startVoice}
+            <button type="button" onClick={() => isListening && voiceTarget === 'content' ? stopVoice() : startVoice('content')}
               className={`px-3 py-1 rounded-md text-sm font-black transition
-                ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
+                ${isListening && voiceTarget === 'content' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
             >
-              🎤 {isListening ? '중지' : '말로 쓰기'}
+              🎤 {isListening && voiceTarget === 'content' ? '중지' : '말로 쓰기'}
             </button>
           </div>
 
