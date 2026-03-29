@@ -267,7 +267,7 @@ export default function DiaryWritePage() {
           <div style={{width: '40px'}} />
         </header>
 
-        <div className="flex-1 py-4 flex flex-col gap-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
+        <div className="flex-1 flex flex-col gap-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
           {/* 저장 완료 메시지 */}
           <div className="bg-gray-900 border border-gray-800 rounded-md p-4 text-center">
             <p className="text-green-400 font-black text-base">✅ 이야기가 저장되었어요</p>
@@ -295,9 +295,9 @@ export default function DiaryWritePage() {
           </button>
           <button
             onClick={() => navigate('/')}
-            className="text-gray-500 font-bold text-sm text-center py-2"
+            className="bg-gray-800 hover:bg-gray-700 text-gray-300 font-black rounded-md py-4 text-lg transition"
           >
-            목록으로 돌아가기
+            📋 목록으로 돌아가기
           </button>
         </div>
       </div>
