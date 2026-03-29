@@ -6,6 +6,13 @@ const EMOTION_EMOJI = {
   기쁨: '😊', 슬픔: '😢', 화남: '😠', 평온: '😌',
   설렘: '🥰', 불안: '😰', 피곤: '😴', 감사: '🙏',
 }
+const EMOTION_COLOR = {
+  기쁨:  '#fbbf24', 슬픔:  '#93c5fd', 화남:  '#fca5a5', 평온:  '#86efac',
+  설렘:  '#f9a8d4', 불안:  '#fdba74', 피곤:  '#c4b5fd', 감사:  '#5eead4',
+}
+const WEATHER_COLOR = {
+  맑음: '#fde68a', 흐림: '#d1d5db', 비: '#93c5fd', 눈: '#e0f2fe', 바람: '#a5f3fc',
+}
 const INPUT_ICON = { text: '📝', voice: '🎤', mixed: '📝🎤' }
 
 function DiaryCard({ diary, onClick }) {
@@ -25,7 +32,9 @@ function DiaryCard({ diary, onClick }) {
         {diary.title || '제목 없음'}
       </p>
       {diary.weather && (
-        <p className="text-gray-600 font-bold text-sm mt-1">{diary.weather}</p>
+        <p className="font-bold text-sm mt-1" style={{ color: WEATHER_COLOR[diary.weather] || '#4b5563' }}>
+          {diary.weather}
+        </p>
       )}
     </div>
   )
@@ -104,26 +113,37 @@ function CalendarView({ diaries, onDiaryClick }) {
           const isSelected = dateStr === selectedDate
           const colIdx = idx % 7
 
+          const firstDiary = dateMap[dateStr]?.[0]
+          const emotionColor = firstDiary?.emotion ? EMOTION_COLOR[firstDiary.emotion] : null
+          // 날짜 셀 배경: 선택됨 > 감정색(연하게) > 오늘 > 기본
+          const cellBg = isSelected
+            ? '#1d4ed8'
+            : emotionColor
+              ? emotionColor + '33'  // 투명도 20%
+              : isToday
+                ? '#1f2937'
+                : undefined
+
           return (
             <div
               key={dateStr}
               onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-              className={`flex flex-col items-center py-1 rounded-md cursor-pointer transition
-                ${isSelected ? 'bg-blue-700' : isToday ? 'bg-gray-800' : 'hover:bg-gray-900'}`}
+              style={cellBg ? { backgroundColor: cellBg } : {}}
+              className="flex flex-col items-center py-1 rounded-md cursor-pointer transition hover:opacity-80"
             >
               <span className={`text-sm font-bold leading-tight
                 ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
               >
                 {day}
               </span>
-              {count > 0 && (
-                <span className={`text-xs font-black leading-tight mt-0.5
-                  ${isSelected ? 'text-blue-200' : 'text-blue-400'}`}
-                >
-                  {count}
+              {count > 0 ? (
+                <span className="text-base leading-tight mt-0.5" title={firstDiary?.emotion || ''}>
+                  {firstDiary?.emotion ? EMOTION_EMOJI[firstDiary.emotion] : '📓'}
+                  {count > 1 && <sup className="text-xs text-gray-400 font-black ml-0.5">{count}</sup>}
                 </span>
+              ) : (
+                <span className="text-xs leading-tight mt-0.5 opacity-0">·</span>
               )}
-              {count === 0 && <span className="text-xs leading-tight mt-0.5 opacity-0">0</span>}
             </div>
           )
         })}

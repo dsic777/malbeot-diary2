@@ -11,6 +11,26 @@ const EMOTION_EMOJI = {
 }
 const WEATHER_EMOJI = { 맑음: '☀️', 흐림: '☁️', 비: '🌧️', 눈: '❄️', 바람: '💨' }
 
+// 감정별 선택 색상 (밝은 배경 + 검은 글씨)
+const EMOTION_COLOR = {
+  기쁨:  '#fbbf24', // amber
+  슬픔:  '#93c5fd', // blue-300
+  화남:  '#fca5a5', // red-300
+  평온:  '#86efac', // green-300
+  설렘:  '#f9a8d4', // pink-300
+  불안:  '#fdba74', // orange-300
+  피곤:  '#c4b5fd', // violet-300
+  감사:  '#5eead4', // teal-300
+}
+// 날씨별 선택 색상
+const WEATHER_COLOR = {
+  맑음: '#fde68a', // amber-200
+  흐림: '#d1d5db', // gray-300
+  비:   '#93c5fd', // blue-300
+  눈:   '#e0f2fe', // sky-100
+  바람: '#a5f3fc', // cyan-200
+}
+
 function TTSToggle({ enabled, speaking, onToggle, onSpeak, hasFeedback }) {
   return (
     <div className="flex items-center gap-2">
@@ -52,7 +72,7 @@ export default function DiaryWritePage() {
   const navigate = useNavigate()
   const today = new Date().toISOString().slice(0, 10)
   const [form, setForm] = useState({
-    title: '', content: '', emotion: '', weather: '',
+    title: '', content: '', emotion: '평온', weather: '맑음',
     diary_date: today, input_type: 'text', persona_id: null,
   })
   const [loading, setLoading] = useState(false)
@@ -242,15 +262,23 @@ export default function DiaryWritePage() {
         <div className="flex flex-col gap-2">
           <label className="text-gray-500 font-bold text-sm">오늘의 감정</label>
           <div className="flex flex-wrap gap-2">
-            {EMOTIONS.map((em) => (
-              <button key={em} type="button"
-                onClick={() => setForm({ ...form, emotion: form.emotion === em ? '' : em })}
-                className={`px-3 py-1 rounded-md text-sm font-bold border transition
-                  ${form.emotion === em ? 'bg-amber-400 border-amber-400 text-black' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
-              >
-                {EMOTION_EMOJI[em]} {em}
-              </button>
-            ))}
+            {EMOTIONS.map((em) => {
+              const selected = form.emotion === em
+              return (
+                <button key={em} type="button"
+                  onClick={() => setForm({ ...form, emotion: form.emotion === em ? '' : em })}
+                  style={selected ? {
+                    backgroundColor: EMOTION_COLOR[em],
+                    borderColor: EMOTION_COLOR[em],
+                    color: '#000',
+                  } : {}}
+                  className={`px-3 py-1.5 rounded-full text-sm font-bold border transition
+                    ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                >
+                  {EMOTION_EMOJI[em]} {em}
+                </button>
+              )
+            })}
           </div>
         </div>
 
@@ -258,15 +286,23 @@ export default function DiaryWritePage() {
         <div className="flex flex-col gap-2">
           <label className="text-gray-500 font-bold text-sm">오늘의 날씨</label>
           <div className="flex flex-wrap gap-2">
-            {WEATHERS.map((w) => (
-              <button key={w} type="button"
-                onClick={() => setForm({ ...form, weather: form.weather === w ? '' : w })}
-                className={`px-3 py-1 rounded-md text-sm font-bold border transition
-                  ${form.weather === w ? 'bg-slate-400 border-slate-400 text-white' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
-              >
-                {WEATHER_EMOJI[w]} {w}
-              </button>
-            ))}
+            {WEATHERS.map((w) => {
+              const selected = form.weather === w
+              return (
+                <button key={w} type="button"
+                  onClick={() => setForm({ ...form, weather: form.weather === w ? '' : w })}
+                  style={selected ? {
+                    backgroundColor: WEATHER_COLOR[w],
+                    borderColor: WEATHER_COLOR[w],
+                    color: '#000',
+                  } : {}}
+                  className={`px-3 py-1.5 rounded-full text-sm font-bold border transition
+                    ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
+                >
+                  {WEATHER_EMOJI[w]} {w}
+                </button>
+              )
+            })}
           </div>
         </div>
 
