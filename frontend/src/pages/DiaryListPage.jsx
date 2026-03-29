@@ -76,7 +76,8 @@ function CalendarView({ diaries, onDiaryClick }) {
   const handleMouseUp = (e) => {
     if (touchStartX.current === null) return
     const diff = touchStartX.current - e.clientX
-    if (Math.abs(diff) > 50) { diff > 0 ? nextMonth() : prevMonth() }
+    // 80px 이상 드래그해야 월 이동 (날짜 클릭과 충돌 방지)
+    if (Math.abs(diff) > 80) { diff > 0 ? nextMonth() : prevMonth() }
     touchStartX.current = null
   }
 
@@ -96,10 +97,10 @@ function CalendarView({ diaries, onDiaryClick }) {
   return (
     <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} style={{userSelect: 'none'}}>
       {/* 월 이동 헤더 */}
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">‹</button>
+      <div className="flex items-center justify-between mb-4" style={{paddingLeft: '8px', paddingRight: '8px'}}>
+        <button onClick={prevMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👈</button>
         <span className="text-white font-black text-base">{year}년 {month + 1}월</span>
-        <button onClick={nextMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">›</button>
+        <button onClick={nextMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👉</button>
       </div>
 
       {/* 요일 헤더 */}
