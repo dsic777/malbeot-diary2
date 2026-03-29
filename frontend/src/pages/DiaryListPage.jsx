@@ -219,7 +219,7 @@ export default function DiaryListPage() {
   const displayList = searchResults !== null ? searchResults : diaries
 
   return (
-    <div className="flex-1 bg-black flex flex-col">
+    <div className="flex-1 bg-black flex flex-col overflow-hidden">
       {/* 헤더 */}
       <header className="bg-black border-b border-gray-800 px-5 flex items-center justify-between sticky top-0 z-10" style={{paddingTop: '18px', paddingBottom: '18px'}}>
         <h1 className="text-lg font-black text-white" style={{marginLeft: '10px'}}>🌿 말벗이 내 손 안에</h1>
