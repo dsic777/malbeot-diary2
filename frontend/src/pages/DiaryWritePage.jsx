@@ -201,7 +201,7 @@ export default function DiaryWritePage() {
   const [aiFeedback, setAiFeedback] = useState('')
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
-  const sessionFinalRef = useRef('')
+  const keepListeningRef = useRef(false)
   const { enabled, speaking, speak, toggle } = useTTS()
 
   // 페이지 떠날 때 TTS 중단
@@ -221,46 +221,55 @@ export default function DiaryWritePage() {
       return
     }
     setVoiceTarget(target)
-    sessionFinalRef.current = ''
+    keepListeningRef.current = true
+
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
-    recognition.continuous = true
+    recognition.continuous = false   // Android 중복 방지: 한 발화씩 처리
     recognition.interimResults = true
 
     recognition.onstart = () => { setIsListening(true); setVoiceStatus('듣고 있어요... 🎤') }
     recognition.onresult = (event) => {
-      // 세션 전체 final 텍스트 수집 (Android 재시작 시 resultIndex가 0으로 리셋되므로 전체 순회)
-      let allFinal = ''
-      let interim = ''
+      let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) allFinal += event.results[i][0].transcript
+        if (event.results[i].isFinal) finalText += event.results[i][0].transcript
         else interim += event.results[i][0].transcript
       }
-      // 이전에 처리한 것보다 새로 늘어난 부분만 추가
-      if (allFinal.length > sessionFinalRef.current.length) {
-        const newPart = allFinal.slice(sessionFinalRef.current.length).trim()
-        sessionFinalRef.current = allFinal
-        if (newPart) {
-          if (target === 'title') {
-            setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + newPart }))
-          } else {
-            setForm((prev) => ({
-              ...prev,
-              content: prev.content + (prev.content ? ' ' : '') + newPart,
-              input_type: 'voice',
-            }))
-          }
+      if (finalText) {
+        if (target === 'title') {
+          setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
+        } else {
+          setForm((prev) => ({
+            ...prev,
+            content: prev.content + (prev.content ? ' ' : '') + finalText,
+            input_type: 'voice',
+          }))
         }
       }
       if (interim) setVoiceStatus(`인식 중: ${interim}`)
     }
-    recognition.onerror = () => { setIsListening(false); setVoiceStatus('다시 시도해주세요.') }
-    recognition.onend = () => { setIsListening(false); setVoiceStatus('음성 입력 완료') }
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech') return  // 무음은 무시하고 재시작
+      keepListeningRef.current = false
+      setIsListening(false)
+      setVoiceStatus('다시 시도해주세요.')
+    }
+    recognition.onend = () => {
+      if (keepListeningRef.current) {
+        try { recognition.start() } catch (_) {}  // 자동 재시작
+      } else {
+        setIsListening(false)
+        setVoiceStatus('음성 입력 완료')
+      }
+    }
     recognitionRef.current = recognition
     recognition.start()
   }
 
-  const stopVoice = () => recognitionRef.current?.stop()
+  const stopVoice = () => {
+    keepListeningRef.current = false
+    recognitionRef.current?.stop()
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
