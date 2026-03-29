@@ -29,6 +29,7 @@ class FeedbackService:
 
         prompt = f"""{persona_context}사용자가 오늘 일기를 썼습니다. 따뜻하고 진심 어린 공감의 말을 3~4문장으로 전해주세요.
 판단하거나 조언하지 말고, 감정을 먼저 알아봐 주는 말로 답해주세요.
+반드시 순수한 텍스트로만 답하세요. #, **, *, - 같은 마크다운 기호는 절대 사용하지 마세요.
 
 {emotion_context}일기 내용:
 {content}
@@ -41,4 +42,10 @@ class FeedbackService:
             messages=[{"role": "user", "content": prompt}],
         )
 
-        return message.content[0].text.strip()
+        text = message.content[0].text.strip()
+        # 혹시 남은 마크다운 기호 제거
+        import re
+        text = re.sub(r'^#+\s*', '', text, flags=re.MULTILINE)
+        text = re.sub(r'\*+', '', text)
+        text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)
+        return text.strip()

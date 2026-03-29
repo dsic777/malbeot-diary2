@@ -24,57 +24,72 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50 flex flex-col items-center justify-center px-5">
-      <div className="w-full max-w-sm">
+    <div className="flex-1 bg-black flex flex-col items-center justify-center px-6">
+      <div className="w-full">
+
         {/* 로고 영역 */}
         <div className="text-center mb-10">
-          <div className="text-5xl mb-3">🌿</div>
-          <h1 className="text-3xl font-bold text-amber-800">말벗이 내 손 안에</h1>
-          <p className="text-gray-500 mt-2 text-lg">오늘 하루 어떠셨나요?</p>
+          <div className="text-6xl mb-5">🌿</div>
+          <h1 className="text-3xl font-black text-white mb-3">말벗이 내 손 안에</h1>
+          <p className="text-gray-400 text-lg leading-relaxed">
+            언제든 말을 걸 수 있는<br />
+            <span className="text-gray-500 font-bold">내 손 안의 </span>
+            <span className="text-amber-400 font-black text-xl">절친</span>
+          </p>
         </div>
 
         {/* 로그인 폼 */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md p-7 flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-600 font-medium">아이디</label>
+        <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3" style={{marginTop: '30px'}} autoComplete="off">
+
+          {/* 아이디 */}
+          <div className="w-[70%] flex flex-col gap-2">
+            <label className="text-gray-300 font-bold text-base">아이디</label>
             <input
               type="text"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="아이디를 입력하세요"
-              className="border border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-amber-400"
+              autoComplete="off"
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-4 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
               required
             />
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-gray-600 font-medium">비밀번호</label>
+
+          {/* 비밀번호 */}
+          <div className="w-[70%] flex flex-col gap-2">
+            <label className="text-gray-300 font-bold text-base">비밀번호</label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="비밀번호를 입력하세요"
-              className="border border-gray-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-amber-400"
+              autoComplete="new-password"
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-4 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
               required
             />
           </div>
 
           {error && (
-            <p className="text-red-500 text-base text-center">{error}</p>
+            <p className="text-red-400 font-bold text-base text-center">{error}</p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl py-4 text-lg mt-2 disabled:opacity-50"
-          >
-            {loading ? '로그인 중...' : '로그인'}
-          </button>
+          {/* 로그인 버튼 */}
+          <div className="w-[70%]" style={{marginTop: '24px'}}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg disabled:opacity-40 transition"
+            >
+              {loading ? '로그인 중...' : '로그인'}
+            </button>
+          </div>
 
-          <p className="text-center text-gray-500">
+          <p className="text-center text-gray-500 font-bold mt-1">
             계정이 없으신가요?{' '}
-            <Link to="/register" className="text-amber-600 font-medium">회원가입</Link>
+            <Link to="/register" className="text-amber-400 font-black">회원가입</Link>
           </p>
         </form>
+
       </div>
     </div>
   )

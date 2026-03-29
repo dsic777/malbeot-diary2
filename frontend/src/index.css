@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
 * {
   box-sizing: border-box;
@@ -8,13 +9,20 @@
 
 body {
   font-family: 'Noto Sans KR', system-ui, sans-serif;
-  background-color: #faf9f7;
-  color: #333;
+  font-weight: 700;
+  background-color: #3f3f3f;
+  color: #fff;
   font-size: 18px;
+  display: flex;
+  justify-content: center;
 }
 
 #root {
+  width: 100%;
+  max-width: 390px;
   min-height: 100svh;
+  background-color: #000;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
 }
