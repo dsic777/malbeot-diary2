@@ -1,6 +1,6 @@
 # 말벗이 내 손 안에 — API 흐름도 (Flow)
 
-> 작성일: 2026-03-28 ~ 2026-03-29 | 작성: 유동주 + Claude AI
+> 작성일: 2026-03-28 ~ 2026-03-30 | 작성: 유동주 + Claude AI
 > 각 기능별 요청~응답 전체 흐름 정리
 
 ---
@@ -107,12 +107,41 @@
     → 피드백 없으면: "말벗에게 물어보기" 버튼 표시
 ```
 
-### 2-4. 일기 삭제
+### 2-4. 일기 수정
 
 ```
-[React] 삭제 버튼 → confirm 확인
+[React] 기록 보기(34번) → ✏️ 수정 버튼 클릭
+    → navigate('/write', { state: { diary } })  ← 기존 데이터 전달
+    ↓
+[이야기 남기기 화면] 수정 모드 감지 (location.state.diary 존재)
+    → 타이틀: "이야기 수정하기"
+    → 폼 미리 채움: 제목·내용·감정·날씨·날짜
+    ↓ PATCH /api/v1/diaries/{diary_id}
+    { title, content, emotion, weather, diary_date, ... }
+[DiaryService.update_diary()]
+    └── 변경된 필드만 업데이트 → DB COMMIT
+    ↓
+[React] 수정 완료 → 기록 보기 화면으로 복귀 (피드백 재생성 없음)
+```
+
+### 2-5. 일기 삭제
+
+```
+[React] 기록 보기(34번) → 🗑️ 삭제 버튼 → confirm 확인
     ↓ DELETE /api/v1/diaries/{diary_id}
 [React] 204 No Content → 목록 화면 이동
+```
+
+### 2-6. 일기 검색
+
+```
+[React] 목록 화면 검색바 → 키워드 입력 후 Enter / 검색 버튼
+    ↓ GET /api/v1/diaries/search?q={keyword}
+[DiaryService.search_diaries()]
+    └── user_id 필터 + title ILIKE OR content ILIKE + 최신순
+    ↓
+[React] 검색 결과 카드 목록 표시 + 결과 건수 안내
+    → ✕ 버튼 클릭 시 검색 초기화 → 전체 목록 복귀
 ```
 
 ---
@@ -292,7 +321,32 @@ humanrm-nginx-1 → humanrm-web-1 → humanrm-db-1
 
 ---
 
-## 8. HTTPS 적용 후 아키텍처 (DuckDNS + Let's Encrypt)
+## 8. 캘린더 흐름
+
+```
+[React] 목록 화면 → 📅 캘린더 탭 클릭
+    → 이미 로드된 diaries 데이터 사용 (추가 API 요청 없음)
+    → diary_date 기준으로 날짜별 Map 생성
+    ↓
+[캘린더 렌더링]
+    → 날짜 셀: 감정 이모지 + 날씨 이모지 + 건수
+    → 감정색 20% 투명도로 셀 배경 힌트
+    → 오늘 날짜 amber 강조
+    ↓
+[날짜 클릭]
+    → selectedDate 상태 업데이트
+    → 해당 날짜 일기 목록 달력 아래 인라인 표시
+    → 일기 카드 클릭 → navigate('/diary/:id')
+
+[월 이동]
+    → 👈 👉 버튼 클릭
+    → 또는 좌우 스와이프 (모바일 터치)
+    → 또는 마우스 드래그 80px 이상 (PC)
+```
+
+---
+
+## 9. HTTPS 적용 후 아키텍처 (DuckDNS + Let's Encrypt)
 
 ```
 인터넷
