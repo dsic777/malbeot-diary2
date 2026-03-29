@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { api } from '../api/client'
 import { useTTS } from '../hooks/useTTS'
 
@@ -176,11 +176,20 @@ const PERSONA_ICON = { empathy: '🤗', advice: '💡', custom: '✏️' }
 
 export default function DiaryWritePage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const editDiary = location.state?.diary || null
+  const isEdit = !!editDiary
+
   const _d = new Date()
   const today = `${_d.getFullYear()}-${String(_d.getMonth() + 1).padStart(2, '0')}-${String(_d.getDate()).padStart(2, '0')}`
   const [form, setForm] = useState({
-    title: '', content: '', emotion: '평온', weather: '맑음',
-    diary_date: today, input_type: 'text', persona_id: null,
+    title:      editDiary?.title      || '',
+    content:    editDiary?.content    || '',
+    emotion:    editDiary?.emotion    || '평온',
+    weather:    editDiary?.weather    || '맑음',
+    diary_date: editDiary?.diary_date || today,
+    input_type: editDiary?.input_type || 'text',
+    persona_id: editDiary?.persona_id || null,
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -243,18 +252,24 @@ export default function DiaryWritePage() {
     if (!form.content.trim()) { setError('내용을 입력해주세요.'); return }
     setLoading(true); setError('')
     try {
-      const diary = await api.post('/diaries/', form)
-      setSavedDiary(diary)
-      // 피드백 자동 생성
-      setFeedbackLoading(true)
-      try {
-        const result = await api.post(`/feedback/${diary.id}`, {})
-        setAiFeedback(result.ai_feedback)
-        if (enabled) speak(result.ai_feedback)
-      } catch {
-        setAiFeedback('')
-      } finally {
-        setFeedbackLoading(false)
+      if (isEdit) {
+        // 수정 모드: PATCH 후 상세 화면으로 이동
+        await api.patch(`/diaries/${editDiary.id}`, form)
+        navigate(`/diary/${editDiary.id}`)
+      } else {
+        // 신규 작성: POST 후 피드백 화면
+        const diary = await api.post('/diaries/', form)
+        setSavedDiary(diary)
+        setFeedbackLoading(true)
+        try {
+          const result = await api.post(`/feedback/${diary.id}`, {})
+          setAiFeedback(result.ai_feedback)
+          if (enabled) speak(result.ai_feedback)
+        } catch {
+          setAiFeedback('')
+        } finally {
+          setFeedbackLoading(false)
+        }
       }
     } catch (err) {
       setError(err.message)
@@ -335,7 +350,7 @@ export default function DiaryWritePage() {
             hasFeedback={false}
           />
         </div>
-        <h1 className="text-lg font-black text-white">이야기 남기기</h1>
+        <h1 className="text-lg font-black text-white">{isEdit ? '이야기 수정하기' : '이야기 남기기'}</h1>
         <div style={{width: '40px'}} />
       </header>
 
@@ -473,7 +488,7 @@ export default function DiaryWritePage() {
         <button type="submit" disabled={loading}
           className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg disabled:opacity-40 transition"
         >
-          {loading ? '저장 중...' : '💾 저장'}
+          {loading ? (isEdit ? '수정 중...' : '저장 중...') : isEdit ? '✅ 수정 완료' : '💾 저장'}
         </button>
       </form>
     </div>

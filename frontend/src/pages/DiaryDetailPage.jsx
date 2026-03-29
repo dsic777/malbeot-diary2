@@ -110,7 +110,10 @@ export default function DiaryDetailPage() {
           />
         </div>
         <h1 className="text-lg font-black text-white">기록 보기</h1>
-        <button onClick={handleDelete} className="text-red-500 font-bold text-sm">삭제</button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/write', { state: { diary } })} className="text-blue-400 font-bold text-sm">✏️ 수정</button>
+          <button onClick={handleDelete} className="text-red-500 font-bold text-sm">삭제</button>
+        </div>
       </header>
 
       <div className="flex-1 py-4 flex flex-col gap-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
