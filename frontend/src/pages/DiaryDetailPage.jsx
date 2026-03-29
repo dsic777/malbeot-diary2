@@ -112,7 +112,7 @@ export default function DiaryDetailPage() {
         <h1 className="text-lg font-black text-white">기록 보기</h1>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/write', { state: { diary } })} className="text-blue-400 font-bold text-sm">✏️ 수정</button>
-          <button onClick={handleDelete} className="text-red-500 font-bold text-sm">삭제</button>
+          <button onClick={handleDelete} className="text-red-500 font-bold text-sm">🗑️ 삭제</button>
         </div>
       </header>
 
