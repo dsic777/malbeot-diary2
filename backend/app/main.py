@@ -30,6 +30,7 @@ app = FastAPI(
     description="음성 + AI 공감 피드백 모바일 일기 서비스",
     version="1.0.0",
     lifespan=lifespan,
+    redirect_slashes=False,
 )
 
 # CORS 설정 (React 개발서버 + 모바일 접속 허용)
