@@ -227,25 +227,33 @@
 ## 5. 음성 입력 (STT)
 
 ```
-[19번 화면] 🎤 말로 쓰기 버튼 클릭
+[19번 화면] 제목 또는 내용의 🎤 말로 쓰기 버튼 클릭
     ↓
 [Web Speech Recognition API 시작]
     recognition.lang = 'ko-KR'
-    recognition.continuous = true
+    recognition.continuous = false   ← Android 중복 방지 핵심
     recognition.interimResults = true
+    keepListeningRef.current = true
     ↓
 사용자 말하는 중...
     interim 결과 → 상태바에 "인식 중: ..." 표시
-    final 결과 → textarea에 텍스트 추가 (누적)
+    final 결과 → 제목 또는 내용 textarea에 텍스트 추가
     input_type → 'voice' 로 변경
     ↓
-[중지 버튼 클릭] → recognition.stop()
+[발화 끝] → onend 자동 호출
+    keepListeningRef === true → recognition.start() 자동 재시작
+    → 중지 버튼 누를 때까지 반복
+    ↓
+[중지 버튼 클릭]
+    keepListeningRef.current = false → recognition.stop()
     → "음성 입력 완료" 표시
     ↓
 [저장 버튼] → 음성으로 입력된 내용으로 일기 저장
 ```
 
 > ⚠️ HTTPS 환경에서만 마이크 권한 허용
+> ⚠️ Android Chrome에서 `continuous: true` 사용 시 내부 재시작으로 중복 발생
+>    → `continuous: false` + onend 재시작 방식이 Android 표준 패턴
 
 ---
 
@@ -384,3 +392,6 @@ docker start humanrm-nginx-1
 sudo crontab -e
 # 추가: 0 3 1 * * certbot renew --quiet && docker restart malbeot-diary2-frontend-1
 ```
+
+참고사항 url로 QR 만들기
+https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://mymalbeot.duckdns.org
