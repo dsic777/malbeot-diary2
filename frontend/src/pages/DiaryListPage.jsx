@@ -127,7 +127,8 @@ function CalendarView({ diaries, onDiaryClick }) {
           const isSelected = dateStr === selectedDate
           const colIdx = idx % 7
 
-          const firstDiary = dateMap[dateStr]?.[0]
+          const entries = dateMap[dateStr]
+          const firstDiary = entries?.[entries.length - 1]
           const emotionColor = firstDiary?.emotion ? EMOTION_COLOR[firstDiary.emotion] : null
           const cellBg = isSelected
             ? '#1d4ed8'
