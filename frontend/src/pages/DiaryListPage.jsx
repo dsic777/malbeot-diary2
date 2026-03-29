@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 
@@ -43,6 +43,7 @@ function CalendarView({ diaries, onDiaryClick }) {
   const [year, setYear] = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth()) // 0-indexed
   const [selectedDate, setSelectedDate] = useState(null)
+  const touchStartX = useRef(null)
 
   // diary_date(YYYY-MM-DD) → Map<string, Diary[]>
   const dateMap = {}
@@ -64,6 +65,14 @@ function CalendarView({ diaries, onDiaryClick }) {
     setSelectedDate(null)
   }
 
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX }
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 50) { diff > 0 ? nextMonth() : prevMonth() }
+    touchStartX.current = null
+  }
+
   // 해당 달의 첫째날 요일 & 마지막날
   const firstDay = new Date(year, month, 1).getDay()
   const lastDate = new Date(year, month + 1, 0).getDate()
@@ -78,7 +87,7 @@ function CalendarView({ diaries, onDiaryClick }) {
   const selectedDiaries = selectedDate ? (dateMap[selectedDate] || []) : []
 
   return (
-    <div>
+    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* 월 이동 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={prevMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">‹</button>
