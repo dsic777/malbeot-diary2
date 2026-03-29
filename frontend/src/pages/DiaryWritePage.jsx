@@ -39,6 +39,7 @@ function DatePicker({ value, onChange }) {
   const parsed = value ? new Date(value + 'T00:00:00') : new Date()
   const [year, setYear] = useState(parsed.getFullYear())
   const [month, setMonth] = useState(parsed.getMonth())
+  const swipeRef = useRef(null)
 
   const dayName = value ? WEEKDAYS_FULL[new Date(value + 'T00:00:00').getDay()] : ''
 
@@ -59,9 +60,17 @@ function DatePicker({ value, onChange }) {
   const prevMonth = () => { if (month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
   const nextMonth = () => { if (month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
 
+  const onSwipeStart = (x) => { swipeRef.current = x }
+  const onSwipeEnd = (x) => {
+    if (swipeRef.current === null) return
+    const diff = swipeRef.current - x
+    if (Math.abs(diff) > 80) { diff > 0 ? nextMonth() : prevMonth() }
+    swipeRef.current = null
+  }
+
   return (
     <div className="relative">
-      {/* 날짜 표시 버튼 */}
+      {/* 날짜 표시 */}
       <div
         onClick={() => setShow(s => !s)}
         className="bg-gray-900 border border-gray-800 rounded-md py-3 cursor-pointer hover:border-amber-400 flex items-center justify-between transition"
@@ -78,12 +87,19 @@ function DatePicker({ value, onChange }) {
       {show && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShow(false)} />
-          <div className="absolute left-0 right-0 z-50 bg-gray-900 border border-gray-700 rounded-md mt-1 p-3" style={{top: '100%'}}>
+          <div
+            className="absolute left-0 right-0 z-50 bg-gray-900 border border-gray-700 rounded-md mt-1 p-3"
+            style={{top: '100%', userSelect: 'none'}}
+            onTouchStart={(e) => onSwipeStart(e.touches[0].clientX)}
+            onTouchEnd={(e) => onSwipeEnd(e.changedTouches[0].clientX)}
+            onMouseDown={(e) => onSwipeStart(e.clientX)}
+            onMouseUp={(e) => onSwipeEnd(e.clientX)}
+          >
             {/* 월 이동 */}
-            <div className="flex items-center justify-between mb-2">
-              <button type="button" onClick={prevMonth} className="text-gray-400 text-xl px-2 py-1 hover:text-white">‹</button>
+            <div className="flex items-center justify-between mb-2" style={{paddingLeft: '8px', paddingRight: '8px'}}>
+              <button type="button" onClick={prevMonth} className="text-2xl px-1 hover:opacity-60 transition">👈</button>
               <span className="text-white font-black text-sm">{year}년 {month+1}월</span>
-              <button type="button" onClick={nextMonth} className="text-gray-400 text-xl px-2 py-1 hover:text-white">›</button>
+              <button type="button" onClick={nextMonth} className="text-2xl px-1 hover:opacity-60 transition">👉</button>
             </div>
             {/* 요일 헤더 */}
             <div className="grid grid-cols-7 mb-1">
@@ -91,7 +107,7 @@ function DatePicker({ value, onChange }) {
                 <div key={w} className={`text-center text-xs font-black pb-1 ${i===0?'text-red-400':i===6?'text-blue-400':'text-gray-500'}`}>{w}</div>
               ))}
             </div>
-            {/* 날짜 셀 */}
+            {/* 날짜 셀 — 날짜만, 심플하게 */}
             <div className="grid grid-cols-7 gap-y-0.5">
               {cells.map((day, idx) => {
                 if (!day) return <div key={`e-${idx}`} />
@@ -105,7 +121,7 @@ function DatePicker({ value, onChange }) {
                     type="button"
                     onClick={() => handleSelect(day)}
                     style={isSelected ? {backgroundColor:'#fbbf24', color:'#000'} : {}}
-                    className={`text-sm font-bold py-1.5 rounded-md transition
+                    className={`text-sm font-bold py-2 rounded-md transition
                       ${isSelected ? '' : isToday ? 'bg-gray-700 text-amber-400' : 'hover:bg-gray-700'}
                       ${!isSelected && !isToday ? (col===0?'text-red-400':col===6?'text-blue-400':'text-gray-300') : ''}`}
                   >
