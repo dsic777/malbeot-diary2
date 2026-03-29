@@ -13,6 +13,7 @@ const EMOTION_COLOR = {
 const INPUT_ICON = { text: '📝', voice: '🎤', mixed: '📝🎤' }
 const WEATHER_EMOJI = { 맑음: '☀️', 흐림: '☁️', 비: '🌧️', 눈: '❄️', 바람: '💨' }
 
+
 function DiaryCard({ diary, onClick }) {
   return (
     <div
@@ -98,9 +99,11 @@ function CalendarView({ diaries, onDiaryClick }) {
       </div>
 
       {/* 날짜 셀 */}
-      <div className="grid grid-cols-7 gap-y-1">
+      <div className="grid grid-cols-7" style={{borderTop: '1px solid rgba(255,255,255,0.07)'}}>
         {cells.map((day, idx) => {
-          if (!day) return <div key={`empty-${idx}`} />
+          if (!day) return (
+            <div key={`empty-${idx}`} style={{borderBottom: '1px solid rgba(255,255,255,0.07)', minHeight: '62px'}} />
+          )
           const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
           const count = dateMap[dateStr]?.length || 0
           const isToday = dateStr === todayStr
@@ -109,11 +112,10 @@ function CalendarView({ diaries, onDiaryClick }) {
 
           const firstDiary = dateMap[dateStr]?.[0]
           const emotionColor = firstDiary?.emotion ? EMOTION_COLOR[firstDiary.emotion] : null
-          // 날짜 셀 배경: 선택됨 > 감정색(연하게) > 오늘 > 기본
           const cellBg = isSelected
             ? '#1d4ed8'
             : emotionColor
-              ? emotionColor + '33'  // 투명도 20%
+              ? emotionColor + '2a'
               : isToday
                 ? '#1f2937'
                 : undefined
@@ -122,21 +124,40 @@ function CalendarView({ diaries, onDiaryClick }) {
             <div
               key={dateStr}
               onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-              style={cellBg ? { backgroundColor: cellBg } : {}}
-              className="flex flex-col items-center py-1 rounded-md cursor-pointer transition hover:opacity-80"
+              style={{
+                ...(cellBg ? { backgroundColor: cellBg } : {}),
+                borderBottom: '1px solid rgba(255,255,255,0.07)',
+                minHeight: '62px',
+              }}
+              className="flex flex-col items-center pt-1.5 pb-1 cursor-pointer transition hover:opacity-75"
             >
+              {/* 날짜 숫자 */}
               <span className={`text-sm font-bold leading-tight
                 ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
               >
                 {day}
               </span>
+
               {count > 0 ? (
-                <span className="text-base leading-tight mt-0.5" title={firstDiary?.emotion || ''}>
-                  {firstDiary?.emotion ? EMOTION_EMOJI[firstDiary.emotion] : '📓'}
-                  {count > 1 && <sup className="text-xs text-gray-400 font-black ml-0.5">{count}</sup>}
-                </span>
+                <>
+                  {/* 감정 + 날씨 이모지 */}
+                  <div className="flex items-center justify-center gap-0.5 mt-1 leading-none">
+                    {firstDiary?.emotion && (
+                      <span style={{fontSize: '14px'}}>{EMOTION_EMOJI[firstDiary.emotion]}</span>
+                    )}
+                    {firstDiary?.weather && (
+                      <span style={{fontSize: '14px'}}>{WEATHER_EMOJI[firstDiary.weather]}</span>
+                    )}
+                  </div>
+                  {/* 건수 */}
+                  <span className={`text-xs font-black mt-0.5 leading-none
+                    ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}
+                  >
+                    {count}건
+                  </span>
+                </>
               ) : (
-                <span className="text-xs leading-tight mt-0.5 opacity-0">·</span>
+                <div style={{minHeight: '38px'}} />
               )}
             </div>
           )
