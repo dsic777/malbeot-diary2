@@ -10,10 +10,8 @@ const EMOTION_COLOR = {
   기쁨:  '#fbbf24', 슬픔:  '#93c5fd', 화남:  '#fca5a5', 평온:  '#86efac',
   설렘:  '#f9a8d4', 불안:  '#fdba74', 피곤:  '#c4b5fd', 감사:  '#5eead4',
 }
-const WEATHER_COLOR = {
-  맑음: '#fde68a', 흐림: '#d1d5db', 비: '#93c5fd', 눈: '#e0f2fe', 바람: '#a5f3fc',
-}
 const INPUT_ICON = { text: '📝', voice: '🎤', mixed: '📝🎤' }
+const WEATHER_EMOJI = { 맑음: '☀️', 흐림: '☁️', 비: '🌧️', 눈: '❄️', 바람: '💨' }
 
 function DiaryCard({ diary, onClick }) {
   return (
@@ -26,16 +24,12 @@ function DiaryCard({ diary, onClick }) {
         <div className="flex gap-2 text-xl">
           <span>{INPUT_ICON[diary.input_type] || '📝'}</span>
           {diary.emotion && <span>{EMOTION_EMOJI[diary.emotion]}</span>}
+          {diary.weather && <span>{WEATHER_EMOJI[diary.weather]}</span>}
         </div>
       </div>
       <p className="font-black text-white text-base">
         {diary.title || '제목 없음'}
       </p>
-      {diary.weather && (
-        <p className="font-bold text-sm mt-1" style={{ color: WEATHER_COLOR[diary.weather] || '#4b5563' }}>
-          {diary.weather}
-        </p>
-      )}
     </div>
   )
 }
