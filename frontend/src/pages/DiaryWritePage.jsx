@@ -232,7 +232,7 @@ export default function DiaryWritePage() {
         <div style={{width: '40px'}} />
       </header>
 
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
         {/* 날짜 */}
         <div className="flex flex-col gap-1">
           <label className="text-gray-500 font-bold text-sm">날짜</label>

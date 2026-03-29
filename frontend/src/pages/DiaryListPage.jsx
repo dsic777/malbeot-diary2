@@ -282,7 +282,7 @@ export default function DiaryListPage() {
       )}
 
       {/* 본문 */}
-      <main className="flex-1 py-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
+      <main className="flex-1 py-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px'}}>
         {loading ? (
           <p className="text-center text-gray-600 mt-10 font-bold">불러오는 중...</p>
         ) : tab === 'calendar' ? (

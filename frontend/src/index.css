@@ -20,9 +20,10 @@ body {
 #root {
   width: 100%;
   max-width: 390px;
-  min-height: 100svh;
+  height: 100svh;
   background-color: #000;
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  overflow: hidden;
 }
