@@ -1,22 +1,24 @@
 # 말벗이 내 손 안에 — API 흐름도 (Flow)
 
-> 작성일: 2026-03-28 | 작성: 유동주 + Claude AI
+> 작성일: 2026-03-28 ~ 2026-03-29 | 작성: 유동주 + Claude AI
 > 각 기능별 요청~응답 전체 흐름 정리
 
 ---
 
-## 구조 개념도
+## 전체 구조 개념도
 
 ```
-[React 앱 (모바일)]
-        ↕  HTTP 요청/응답 (JSON)
-[FastAPI 백엔드]
+[React 앱 (모바일, 포트 5173/80)]
+        ↕  HTTP 요청/응답 (JSON)  /api/v1/...
+[FastAPI 백엔드 (포트 8000)]
     ├── api/v1/       ← 엔드포인트 (창구)
     ├── services/     ← 비즈니스 로직 (처리)
     ├── models/       ← DB 테이블 구조
     └── schemas/      ← 요청/응답 데이터 형식
         ↕
 [SQLite DB (개발) / PostgreSQL (운영)]
+        ↕
+[Claude API (Anthropic)] ← AI 피드백 생성
 ```
 
 ---
@@ -42,231 +44,289 @@
 [React] 가입 완료 → 로그인 화면으로 이동
 ```
 
-**관련 파일**
-| 파일 | 역할 |
-|------|------|
-| `api/v1/auth.py` | POST /register 엔드포인트 |
-| `services/auth_service.py` | 중복확인, 암호화, DB저장 |
-| `schemas/user.py` | UserCreate, UserResponse |
-| `models/user.py` | users 테이블 |
-| `core/security.py` | hash_password() |
-
----
-
 ### 1-2. 로그인
 
 ```
 [React] 아이디 / 비밀번호 입력 후 로그인 버튼
     ↓ POST /api/v1/auth/login
-[auth.py] 요청 데이터 수신 (UserLogin 스키마로 검증)
-    ↓
 [AuthService.login()]
-    ├── users 테이블에서 아이디 조회
-    │       없으면 → 401 Unauthorized 오류
-    ├── 입력 비밀번호 vs 암호화 비밀번호 비교 (verify_password)
-    │       불일치 → 401 Unauthorized 오류
-    ├── last_login_at 갱신 → DB 저장 (UPDATE)
+    ├── users 테이블에서 아이디 조회 (없으면 401)
+    ├── 비밀번호 bcrypt 검증 (불일치 → 401)
     └── JWT 토큰 생성 (create_access_token)
     ↓
-[auth.py] TokenResponse 반환 (토큰 + 사용자 정보)
-    ↓
-[React] 토큰을 localStorage에 저장 → 메인 화면으로 이동
+[React] access_token → localStorage 저장 → 메인 화면 이동
 ```
 
-**관련 파일**
-| 파일 | 역할 |
-|------|------|
-| `api/v1/auth.py` | POST /login 엔드포인트 |
-| `services/auth_service.py` | 아이디 조회, 비밀번호 검증, 토큰 발급 |
-| `schemas/user.py` | UserLogin, TokenResponse |
-| `core/security.py` | verify_password(), create_access_token() |
-
----
-
-### 1-3. 인증이 필요한 API 요청 (공통)
+### 1-3. 인증이 필요한 API 공통 흐름
 
 ```
-[React] API 요청 시 Header에 토큰 포함
-    Authorization: Bearer {JWT토큰}
+[React] 모든 API 요청 시 Header 자동 포함
+    Authorization: Bearer {JWT토큰}   ← api/client.js 에서 자동 처리
     ↓
 [FastAPI] get_current_user() 자동 실행 (Depends)
-    ├── 토큰 추출 → decode_access_token()
-    │       토큰 없거나 만료 → 401 Unauthorized
-    ├── 토큰에서 user_id 추출
-    └── users 테이블에서 사용자 조회
-            없으면 → 401 Unauthorized
-    ↓
-[API 함수] current_user 객체 사용 가능
+    ├── 토큰 없거나 만료 → 401 Unauthorized
+    └── 토큰 정상 → current_user 객체 전달
 ```
 
 ---
 
 ## 2. 일기 (Diary)
 
-### 2-1. 일기 작성
+### 2-1. 일기 작성 (19번 화면)
 
 ```
-[React] 제목/감정/날씨/내용/날짜 입력 후 저장 버튼
-    ↓ POST /api/v1/diaries
-    Authorization: Bearer {JWT토큰}
-[diary.py] DiaryCreate 스키마로 검증
-    ↓
+[React] 날짜/제목/감정/날씨/내용/말벗 선택 후 저장
+    ↓ POST /api/v1/diaries/
+    { title, content, emotion, weather, diary_date, input_type, persona_id }
 [DiaryService.create_diary()]
-    ├── Diary 객체 생성 (user_id는 JWT에서)
-    └── DB 저장 (INSERT) → refresh
+    └── DB INSERT → diary 객체 반환
     ↓
-[diary.py] DiaryResponse 반환 (id, title, emotion, weather, content, diary_date, created_at 등)
-    ↓
-[React] 작성 완료 → 상세 화면으로 이동
+[React] 저장 완료 → 자동으로 AI 피드백 요청
+    ↓ POST /api/v1/feedback/{diary_id}
+[React] 피드백 수신 → 19번 화면에 인라인 표시 + TTS 자동 읽기
 ```
 
-**관련 파일**
-| 파일 | 역할 |
-|------|------|
-| `api/v1/diary.py` | POST / 엔드포인트 |
-| `services/diary_service.py` | DB 저장 |
-| `schemas/diary.py` | DiaryCreate, DiaryResponse |
-| `models/diary.py` | diaries 테이블 |
-
----
-
-### 2-2. 일기 목록 조회
+### 2-2. 일기 목록 (17번 화면)
 
 ```
 [React] 메인 화면 진입 시 자동 요청
-    ↓ GET /api/v1/diaries
-    Authorization: Bearer {JWT토큰}
-[diary.py] 현재 사용자의 일기 목록 요청
-    ↓
+    ↓ GET /api/v1/diaries/
 [DiaryService.get_diaries()]
-    └── user_id로 필터링 → diary_date 최신순 정렬
+    └── user_id 필터 + diary_date 최신순 정렬
     ↓
-[diary.py] List[DiaryListResponse] 반환 (id, title, emotion, weather, diary_date, input_type, created_at)
-    ↓
-[React] 목록 카드 형태로 렌더링
+[React] 카드 목록 렌더링 (날짜, 감정이모지, 제목, 날씨)
 ```
 
----
-
-### 2-3. 일기 단건 조회
+### 2-3. 일기 상세 (18번 화면)
 
 ```
-[React] 목록에서 카드 클릭
+[React] 목록 카드 클릭
     ↓ GET /api/v1/diaries/{diary_id}
-    Authorization: Bearer {JWT토큰}
-[DiaryService.get_diary()]
-    ├── diary_id + user_id 동시 조건 (타인 일기 접근 차단)
-    └── 없으면 → 404 Not Found
-    ↓
-[diary.py] DiaryResponse 반환
-    ↓
 [React] 상세 화면 렌더링
+    → 피드백 있으면: TTS 설정 ON이면 0.5초 후 자동 읽기
+    → 피드백 없으면: "말벗에게 물어보기" 버튼 표시
 ```
 
----
-
-### 2-4. 일기 수정
+### 2-4. 일기 삭제
 
 ```
-[React] 수정 버튼 → 수정할 필드 입력
-    ↓ PATCH /api/v1/diaries/{diary_id}
-    Authorization: Bearer {JWT토큰}
-[diary.py] get_diary()로 소유권 확인 → update_diary() 호출
-[DiaryService.update_diary()]
-    ├── 변경된 필드만 선택적 업데이트 (None 필드 무시)
-    └── updated_at 갱신 → DB 저장
-    ↓
-[diary.py] DiaryResponse 반환
-```
-
----
-
-### 2-5. 일기 삭제
-
-```
-[React] 삭제 버튼 (확인 모달)
+[React] 삭제 버튼 → confirm 확인
     ↓ DELETE /api/v1/diaries/{diary_id}
-    Authorization: Bearer {JWT토큰}
-[diary.py] get_diary()로 소유권 확인 → delete_diary() 호출
-[DiaryService.delete_diary()]
-    └── DB에서 해당 행 삭제 (DELETE)
+[React] 204 No Content → 목록 화면 이동
+```
+
+---
+
+## 3. AI 피드백 (Claude Haiku)
+
+### 3-1. 피드백 생성 흐름
+
+```
+[React] POST /api/v1/feedback/{diary_id}
     ↓
-[diary.py] 204 No Content 반환
+[feedback.py]
+    ├── 일기 조회 (소유권 확인)
+    ├── 이미 피드백 있으면 → 기존 피드백 반환
+    ├── diary.persona_id 있으면 → 페르소나 이름/설명 조회
+    └── feedback_service.generate_feedback() 호출
     ↓
-[React] 목록 화면으로 이동 (해당 카드 제거)
+[feedback_service.py]
+    ├── 페르소나 설정으로 프롬프트 구성
+    │   "당신은 '공감형 말벗'입니다. 따뜻하고 공감적인..."
+    ├── Claude API 호출 (claude-haiku-4-5-20251001, max_tokens=300)
+    ├── 응답 텍스트 수신
+    └── 마크다운 기호 제거 (# → 제거, ** → 제거)
+    ↓
+[feedback.py] diary.ai_feedback DB 저장
+    ↓
+[React] { diary_id, ai_feedback } 수신
+    → 화면에 텍스트 표시
+    → TTS ON이면 자동으로 읽어주기
+```
+
+### 3-2. Swagger UI 테스트 방법
+
+브라우저: `http://127.0.0.1:8000/docs`
+
+```
+1. POST /api/v1/auth/login → access_token 복사
+2. 우상단 Authorize → Bearer {토큰} 입력
+3. GET /api/v1/diaries/ → diary id 복사
+4. POST /api/v1/feedback/{diary_id} → Claude 피드백 확인
 ```
 
 ---
 
-## 3. AI 피드백 (Claude API)
+## 4. TTS 읽어주기
 
-### 3-1. Swagger UI 테스트 방법 (공통 절차)
+### 4-1. 흐름
 
-> API 테스트 시 매번 이 순서를 따릅니다.
-> 브라우저 주소창: `http://127.0.0.1:8000/docs`
-
-**1단계 — 로그인 (토큰 받기)**
-
-1. **인증** 섹션 → `POST /api/v1/auth/login` 클릭
-2. **Try it out** 클릭
-3. Request body 입력:
-```json
-{
-  "username": "test",
-  "password": "12345678"
-}
 ```
-4. **Execute** 클릭
-5. Response body에서 `access_token` 값 복사
-```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+[useTTS.js 훅] localStorage('tts_enabled') 로드 (기본값: true)
+    ↓
+[18번 화면 진입 시]
+    일기 상세 API 호출 완료
+    → ai_feedback 있고 TTS ON → 0.5초 후 speak(ai_feedback)
+    → Web Speech Synthesis API 호출 (ko-KR, rate: 0.9)
+    → 🔊 아이콘 파란색으로 변경 (읽는 중)
+    → 읽기 완료 → 🔊 일반 상태로 복귀
 
-**2단계 — 토큰 등록 (Authorize)**
+[19번 화면 저장 후]
+    일기 저장 + 피드백 자동 생성
+    → 피드백 수신 + TTS ON → 자동 읽기 시작
 
-1. 페이지 우상단 자물쇠 모양 **Authorize** 버튼 클릭
-2. Value 입력란에 입력: (`Bearer ` 뒤에 토큰 붙여넣기, 공백 하나 필수)
-```
-Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-3. **Authorize** → **Close** 클릭
-
-**3단계 — 일기 ID 확인**
-
-1. **일기** 섹션 → `GET /api/v1/diaries` → **Try it out** → **Execute**
-2. Response body에서 `id` 복사:
-```json
-[{ "id": "14df3d0e-e73c-4f81-a4f6-8b2b6e0f93b7", "title": "첫 번째 일기" }]
+[뒤로가기 (←) 클릭]
+    useEffect cleanup → window.speechSynthesis.cancel()
+    → 즉시 읽기 중단
 ```
 
-**4단계 — AI 피드백 생성**
+### 4-2. TTS 토글 동작
 
-1. **AI피드백** 섹션 → `POST /api/v1/feedback/{diary_id}` 클릭
-2. **Try it out** → `diary_id` 입력란에 복사한 ID 붙여넣기
-3. **Execute** → Response body에서 Claude 피드백 확인
-
-```json
-{
-  "diary_id": "14df3d0e-e73c-4f81-a4f6-8b2b6e0f93b7",
-  "ai_feedback": "새로운 프로젝트를 시작하며 느껴지는 설렘과 활기가 정말 멋있네요..."
-}
 ```
+헤더 UI: [← 뒤로가기]  [🔊/🔇 아이콘]  [파란 토글]
 
-**관련 파일**
-| 파일 | 역할 |
-|------|------|
-| `api/v1/feedback.py` | POST /{diary_id} 엔드포인트 |
-| `services/feedback_service.py` | Claude API 호출 |
-| `services/diary_service.py` | 일기 조회 및 피드백 저장 |
+🔊 (파란색) + 토글 ON  → TTS 켜짐, 아이콘 클릭 시 다시 읽기
+🔇 (회색)   + 토글 OFF → TTS 꺼짐, 자동 읽기 없음
+
+토글 클릭 시:
+    → localStorage 업데이트
+    → 18번/19번 두 화면 자동 연동 (같은 localStorage 키 사용)
+```
 
 ---
 
-## 4. 음성 (STT/TTS) — 작성 예정
+## 5. 음성 입력 (STT)
+
+```
+[19번 화면] 🎤 말로 쓰기 버튼 클릭
+    ↓
+[Web Speech Recognition API 시작]
+    recognition.lang = 'ko-KR'
+    recognition.continuous = true
+    recognition.interimResults = true
+    ↓
+사용자 말하는 중...
+    interim 결과 → 상태바에 "인식 중: ..." 표시
+    final 결과 → textarea에 텍스트 추가 (누적)
+    input_type → 'voice' 로 변경
+    ↓
+[중지 버튼 클릭] → recognition.stop()
+    → "음성 입력 완료" 표시
+    ↓
+[저장 버튼] → 음성으로 입력된 내용으로 일기 저장
+```
+
+> ⚠️ HTTPS 환경에서만 마이크 권한 허용
 
 ---
 
-## 5. 알림 (Alarm) — 작성 예정
+## 6. 페르소나 (말벗 설정)
+
+### 6-1. 페르소나 추가
+
+```
+[말벗 설정 페이지] /personas
+    → 프리셋 선택 (🤗 공감형 / 💡 조언형) 또는 ✏️ 직접 설정
+    ↓ POST /api/v1/personas/
+    { name, preset_type, custom_description }
+    ↓
+[persona_service.create_persona()] → DB INSERT
+    ↓
+[React] 내 말벗 목록에 추가
+```
+
+### 6-2. 일기 작성 시 말벗 선택
+
+```
+[19번 화면] 저장 버튼 위 말벗 선택 UI
+    [🌿 기본] [🤗 공감형 말벗] [💡 조언형 말벗] ...
+    ↓
+선택한 persona_id → 일기 저장 시 포함
+    ↓ POST /api/v1/diaries/ { ..., persona_id: "uuid" }
+    ↓
+피드백 생성 시 해당 페르소나 스타일로 Claude 응답
+```
+
+### 6-3. 페르소나별 Claude 프롬프트 차이
+
+| 페르소나 | 프롬프트 핵심 | Claude 응답 스타일 |
+|------|------|------|
+| 기본 (없음) | 따뜻한 공감, 3~4문장 | 일반 공감 |
+| 공감형 말벗 | "따뜻하고 공감적인 할머니처럼..." | "그랬구나, 많이 힘들었겠다..." |
+| 조언형 말벗 | "솔직하고 현실적인 친구처럼..." | "현실적으로 이렇게 해보면..." |
+| 직접 설정 | 사용자 입력 설명 그대로 | 입력한 성격 그대로 적용 |
 
 ---
 
-## 6. 페르소나 (Persona) — 작성 예정
+## 7. 배포 아키텍처
+
+### 로컬 개발
+
+```
+브라우저 http://localhost:5173
+    ↓ (Vite proxy /api → 8000)
+React Dev Server (5173)
+    ↕ /api/v1/...
+FastAPI Dev Server (8000)
+    ↕
+SQLite (malbeot2.db)
+```
+
+### 운영 서버 (Docker)
+
+```
+인터넷
+    ↓ :8080
+nginx 컨테이너 (malbeot-diary2-frontend-1)
+    ├── / → React 정적 파일 (/usr/share/nginx/html)
+    └── /api/ → proxy → app:8000
+                    ↓
+              FastAPI 컨테이너 (malbeot-diary2-app-1)
+                    ↓
+              PostgreSQL 컨테이너 (malbeot-diary2-db-1)
+
+같은 서버에 HumanRM도 동작:
+    ↓ :80
+humanrm-nginx-1 → humanrm-web-1 → humanrm-db-1
+```
+
+---
+
+## 8. HTTPS 적용 후 아키텍처 (DuckDNS + Let's Encrypt)
+
+```
+인터넷
+    ↓ malbeot.duckdns.org:443 (HTTPS)
+nginx 컨테이너
+    ├── SSL 인증서 마운트 (/etc/letsencrypt)
+    ├── / → React 정적 파일 (SPA)
+    └── /api/ → proxy → app:8000
+                    ↓
+              FastAPI 컨테이너
+                    ↓
+              PostgreSQL 컨테이너
+
+결과:
+    🎤 음성 입력 (STT) ✅ 정상 동작
+    🔊 TTS 읽어주기    ✅ 정상 동작
+```
+
+### DuckDNS 설정 요약
+
+```bash
+# 1. duckdns.org 에서 malbeot.duckdns.org 도메인 발급
+# 2. EC2 보안그룹 443 포트 열기
+# 3. 서버에서:
+sudo apt install -y certbot
+docker stop humanrm-nginx-1
+sudo certbot certonly --standalone -d malbeot.duckdns.org
+docker start humanrm-nginx-1
+
+# 4. frontend/nginx.conf → HTTPS 설정으로 변경
+# 5. docker-compose.yml → 443 포트 + 인증서 볼륨 추가
+# 6. docker compose down && docker compose up -d --build
+
+# 7. 인증서 자동 갱신 (crontab)
+sudo crontab -e
+# 추가: 0 3 1 * * certbot renew --quiet && docker restart malbeot-diary2-frontend-1
+```
