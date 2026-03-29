@@ -72,6 +72,13 @@ function CalendarView({ diaries, onDiaryClick }) {
     if (Math.abs(diff) > 50) { diff > 0 ? nextMonth() : prevMonth() }
     touchStartX.current = null
   }
+  const handleMouseDown = (e) => { touchStartX.current = e.clientX }
+  const handleMouseUp = (e) => {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.clientX
+    if (Math.abs(diff) > 50) { diff > 0 ? nextMonth() : prevMonth() }
+    touchStartX.current = null
+  }
 
   // 해당 달의 첫째날 요일 & 마지막날
   const firstDay = new Date(year, month, 1).getDay()
@@ -87,7 +94,7 @@ function CalendarView({ diaries, onDiaryClick }) {
   const selectedDiaries = selectedDate ? (dateMap[selectedDate] || []) : []
 
   return (
-    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+    <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} style={{userSelect: 'none'}}>
       {/* 월 이동 헤더 */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={prevMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">‹</button>
