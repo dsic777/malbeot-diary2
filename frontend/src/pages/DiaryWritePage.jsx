@@ -46,26 +46,34 @@ function TTSToggle({ enabled, speaking, onToggle, onSpeak, hasFeedback }) {
   )
 }
 
+const PERSONA_ICON = { empathy: '🤗', advice: '💡', custom: '✏️' }
+
 export default function DiaryWritePage() {
   const navigate = useNavigate()
   const today = new Date().toISOString().slice(0, 10)
   const [form, setForm] = useState({
     title: '', content: '', emotion: '', weather: '',
-    diary_date: today, input_type: 'text',
+    diary_date: today, input_type: 'text', persona_id: null,
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [isListening, setIsListening] = useState(false)
   const [voiceStatus, setVoiceStatus] = useState('')
-  const [savedDiary, setSavedDiary] = useState(null)   // 저장 완료 후 상태
+  const [savedDiary, setSavedDiary] = useState(null)
   const [feedbackLoading, setFeedbackLoading] = useState(false)
   const [aiFeedback, setAiFeedback] = useState('')
+  const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
   const { enabled, speaking, speak, toggle } = useTTS()
 
   // 페이지 떠날 때 TTS 중단
   useEffect(() => {
     return () => { window.speechSynthesis?.cancel() }
+  }, [])
+
+  // 내 말벗 목록 로드
+  useEffect(() => {
+    api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
 
   const startVoice = () => {
@@ -289,6 +297,37 @@ export default function DiaryWritePage() {
             style={{paddingLeft: '10px'}}
           />
         </div>
+
+        {/* 말벗 선택 */}
+        {personas.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-gray-500 font-bold text-sm">말벗 선택 (선택)</label>
+              <button type="button" onClick={() => navigate('/personas')} className="text-amber-400 font-bold text-xs">+ 말벗 관리</button>
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, persona_id: null })}
+                className={`px-3 py-1 rounded-md text-sm font-bold border transition
+                  ${!form.persona_id ? 'bg-amber-400 border-amber-400 text-black' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
+              >
+                🌿 기본
+              </button>
+              {personas.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setForm({ ...form, persona_id: form.persona_id === p.id ? null : p.id })}
+                  className={`px-3 py-1 rounded-md text-sm font-bold border transition
+                    ${form.persona_id === p.id ? 'bg-amber-400 border-amber-400 text-black' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
+                >
+                  {PERSONA_ICON[p.preset_type] || '✏️'} {p.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {error && <p className="text-red-400 font-bold text-sm">{error}</p>}
 

@@ -30,7 +30,10 @@ export default function DiaryListPage() {
       {/* 헤더 */}
       <header className="bg-black border-b border-gray-800 px-5 py-4 flex items-center justify-between sticky top-0 z-10">
         <h1 className="text-lg font-black text-white" style={{marginLeft: '10px'}}>🌿 말벗이 내 손 안에</h1>
-        <button onClick={handleLogout} className="text-gray-500 font-bold text-sm" style={{marginRight: '20px'}}>로그아웃</button>
+        <div className="flex items-center gap-3" style={{marginRight: '20px'}}>
+          <button onClick={() => navigate('/personas')} className="text-gray-400 font-bold text-sm">🎭 말벗</button>
+          <button onClick={handleLogout} className="text-gray-500 font-bold text-sm">로그아웃</button>
+        </div>
       </header>
 
       {/* 본문 */}
