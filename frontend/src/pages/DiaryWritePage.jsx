@@ -24,11 +24,11 @@ const EMOTION_COLOR = {
 }
 // 날씨별 선택 색상
 const WEATHER_COLOR = {
-  맑음: '#fde68a', // amber-200
-  흐림: '#d1d5db', // gray-300
-  비:   '#93c5fd', // blue-300
-  눈:   '#e0f2fe', // sky-100
-  바람: '#a5f3fc', // cyan-200
+  맑음: '#fbbf24', // amber-400
+  흐림: '#94a3b8', // slate-400
+  비:   '#60a5fa', // blue-400
+  눈:   '#7dd3fc', // sky-300
+  바람: '#22d3ee', // cyan-400
 }
 
 const WEEKDAYS_SHORT = ['일', '월', '화', '수', '목', '금', '토']
