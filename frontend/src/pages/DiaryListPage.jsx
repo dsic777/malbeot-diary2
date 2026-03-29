@@ -31,6 +31,125 @@ function DiaryCard({ diary, onClick }) {
   )
 }
 
+// 요일 헤더
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
+
+function CalendarView({ diaries, onDiaryClick }) {
+  const today = new Date()
+  const [year, setYear] = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth()) // 0-indexed
+  const [selectedDate, setSelectedDate] = useState(null)
+
+  // diary_date(YYYY-MM-DD) → Map<string, Diary[]>
+  const dateMap = {}
+  diaries.forEach((d) => {
+    const key = d.diary_date ? d.diary_date.slice(0, 10) : null
+    if (!key) return
+    if (!dateMap[key]) dateMap[key] = []
+    dateMap[key].push(d)
+  })
+
+  const prevMonth = () => {
+    if (month === 0) { setYear(y => y - 1); setMonth(11) }
+    else setMonth(m => m - 1)
+    setSelectedDate(null)
+  }
+  const nextMonth = () => {
+    if (month === 11) { setYear(y => y + 1); setMonth(0) }
+    else setMonth(m => m + 1)
+    setSelectedDate(null)
+  }
+
+  // 해당 달의 첫째날 요일 & 마지막날
+  const firstDay = new Date(year, month, 1).getDay()
+  const lastDate = new Date(year, month + 1, 0).getDate()
+
+  // 달력 셀 배열 (null = 빈칸)
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= lastDate; d++) cells.push(d)
+
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+
+  const selectedDiaries = selectedDate ? (dateMap[selectedDate] || []) : []
+
+  return (
+    <div>
+      {/* 월 이동 헤더 */}
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={prevMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">‹</button>
+        <span className="text-white font-black text-base">{year}년 {month + 1}월</span>
+        <button onClick={nextMonth} className="text-gray-400 text-xl px-3 py-1 hover:text-white transition">›</button>
+      </div>
+
+      {/* 요일 헤더 */}
+      <div className="grid grid-cols-7 mb-1">
+        {WEEKDAYS.map((w, i) => (
+          <div
+            key={w}
+            className={`text-center text-xs font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
+          >
+            {w}
+          </div>
+        ))}
+      </div>
+
+      {/* 날짜 셀 */}
+      <div className="grid grid-cols-7 gap-y-1">
+        {cells.map((day, idx) => {
+          if (!day) return <div key={`empty-${idx}`} />
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+          const count = dateMap[dateStr]?.length || 0
+          const isToday = dateStr === todayStr
+          const isSelected = dateStr === selectedDate
+          const colIdx = idx % 7
+
+          return (
+            <div
+              key={dateStr}
+              onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+              className={`flex flex-col items-center py-1 rounded-md cursor-pointer transition
+                ${isSelected ? 'bg-blue-700' : isToday ? 'bg-gray-800' : 'hover:bg-gray-900'}`}
+            >
+              <span className={`text-sm font-bold leading-tight
+                ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
+              >
+                {day}
+              </span>
+              {count > 0 && (
+                <span className={`text-xs font-black leading-tight mt-0.5
+                  ${isSelected ? 'text-blue-200' : 'text-blue-400'}`}
+                >
+                  {count}
+                </span>
+              )}
+              {count === 0 && <span className="text-xs leading-tight mt-0.5 opacity-0">0</span>}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* 선택된 날짜 일기 목록 */}
+      {selectedDate && (
+        <div className="mt-4">
+          <p className="text-gray-500 font-bold text-xs mb-2">
+            {selectedDate} ({selectedDiaries.length}건)
+          </p>
+          {selectedDiaries.length === 0 ? (
+            <p className="text-gray-600 font-bold text-sm text-center py-4">이 날의 기록이 없어요</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {selectedDiaries.map((d) => (
+                <DiaryCard key={d.id} diary={d} onClick={() => onDiaryClick(d.id)} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function DiaryListPage() {
   const navigate = useNavigate()
   const [diaries, setDiaries] = useState([])
@@ -38,6 +157,7 @@ export default function DiaryListPage() {
   const [keyword, setKeyword] = useState('')
   const [searchResults, setSearchResults] = useState(null)  // null = 검색 안 함
   const [searching, setSearching] = useState(false)
+  const [tab, setTab] = useState('list') // 'list' | 'calendar'
 
   useEffect(() => {
     api.get('/diaries/')
@@ -89,44 +209,64 @@ export default function DiaryListPage() {
         </div>
       </header>
 
-      {/* 검색바 */}
-      <div className="bg-black border-b border-gray-800 overflow-hidden" style={{paddingTop: '12px', paddingBottom: '12px', paddingLeft: '15px', paddingRight: '15px'}}>
-        <div className="flex gap-2 w-full">
-          <div className="flex items-center bg-gray-900 border border-gray-700 rounded-md px-3 gap-2" style={{flex: 1, minWidth: 0}}>
-            <span className="text-gray-500">🔍</span>
-            <input
-              type="text"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="제목 또는 내용 검색..."
-              className="flex-1 bg-transparent text-sm text-white font-bold placeholder-gray-600 focus:outline-none"
-              style={{paddingTop: '12px', paddingBottom: '12px'}}
-            />
-            {keyword && (
-              <button onClick={handleClear} className="text-gray-500 text-base px-1">✕</button>
-            )}
-          </div>
-          <button
-            onClick={handleSearch}
-            disabled={searching}
-            className="text-white font-black text-sm rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
-            style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(52, 145, 217, 0.99)' }}
-          >
-            {searching ? '...' : '검 색'}
-          </button>
-        </div>
-        {searchResults !== null && (
-          <p className="text-gray-600 font-bold text-xs" style={{marginTop: '8px'}}>
-            "{keyword}" 검색 결과 {searchResults.length}건
-          </p>
-        )}
+      {/* 탭 */}
+      <div className="bg-black border-b border-gray-800 flex" style={{paddingLeft: '15px', paddingRight: '15px'}}>
+        <button
+          onClick={() => setTab('list')}
+          className={`flex-1 py-3 text-sm font-black transition border-b-2 ${tab === 'list' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+        >
+          📋 목록
+        </button>
+        <button
+          onClick={() => setTab('calendar')}
+          className={`flex-1 py-3 text-sm font-black transition border-b-2 ${tab === 'calendar' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+        >
+          📅 캘린더
+        </button>
       </div>
+
+      {/* 검색바 (목록 탭에서만) */}
+      {tab === 'list' && (
+        <div className="bg-black border-b border-gray-800 overflow-hidden" style={{paddingTop: '12px', paddingBottom: '12px', paddingLeft: '15px', paddingRight: '15px'}}>
+          <div className="flex gap-2 w-full">
+            <div className="flex items-center bg-gray-900 border border-gray-700 rounded-md px-3 gap-2" style={{flex: 1, minWidth: 0}}>
+              <span className="text-gray-500">🔍</span>
+              <input
+                type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="제목 또는 내용 검색..."
+                className="flex-1 bg-transparent text-sm text-white font-bold placeholder-gray-600 focus:outline-none"
+                style={{paddingTop: '12px', paddingBottom: '12px'}}
+              />
+              {keyword && (
+                <button onClick={handleClear} className="text-gray-500 text-base px-1">✕</button>
+              )}
+            </div>
+            <button
+              onClick={handleSearch}
+              disabled={searching}
+              className="text-white font-black text-sm rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
+              style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(52, 145, 217, 0.99)' }}
+            >
+              {searching ? '...' : '검 색'}
+            </button>
+          </div>
+          {searchResults !== null && (
+            <p className="text-gray-600 font-bold text-xs" style={{marginTop: '8px'}}>
+              "{keyword}" 검색 결과 {searchResults.length}건
+            </p>
+          )}
+        </div>
+      )}
 
       {/* 본문 */}
       <main className="flex-1 py-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
         {loading ? (
           <p className="text-center text-gray-600 mt-10 font-bold">불러오는 중...</p>
+        ) : tab === 'calendar' ? (
+          <CalendarView diaries={diaries} onDiaryClick={(id) => navigate(`/diary/${id}`)} />
         ) : displayList.length === 0 ? (
           <div className="text-center mt-20 text-gray-600">
             <div className="text-5xl mb-4">{searchResults !== null ? '🔍' : '📓'}</div>
