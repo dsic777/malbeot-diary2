@@ -31,6 +31,96 @@ const WEATHER_COLOR = {
   바람: '#a5f3fc', // cyan-200
 }
 
+const WEEKDAYS_SHORT = ['일', '월', '화', '수', '목', '금', '토']
+const WEEKDAYS_FULL = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일']
+
+function DatePicker({ value, onChange }) {
+  const [show, setShow] = useState(false)
+  const parsed = value ? new Date(value + 'T00:00:00') : new Date()
+  const [year, setYear] = useState(parsed.getFullYear())
+  const [month, setMonth] = useState(parsed.getMonth())
+
+  const dayName = value ? WEEKDAYS_FULL[new Date(value + 'T00:00:00').getDay()] : ''
+
+  const firstDay = new Date(year, month, 1).getDay()
+  const lastDate = new Date(year, month + 1, 0).getDate()
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= lastDate; d++) cells.push(d)
+
+  const _t = new Date()
+  const todayStr = `${_t.getFullYear()}-${String(_t.getMonth()+1).padStart(2,'0')}-${String(_t.getDate()).padStart(2,'0')}`
+
+  const handleSelect = (day) => {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+    onChange(dateStr)
+    setShow(false)
+  }
+  const prevMonth = () => { if (month===0){setYear(y=>y-1);setMonth(11)}else setMonth(m=>m-1) }
+  const nextMonth = () => { if (month===11){setYear(y=>y+1);setMonth(0)}else setMonth(m=>m+1) }
+
+  return (
+    <div className="relative">
+      {/* 날짜 표시 버튼 */}
+      <div
+        onClick={() => setShow(s => !s)}
+        className="bg-gray-900 border border-gray-800 rounded-md py-3 cursor-pointer hover:border-amber-400 flex items-center justify-between transition"
+        style={{paddingLeft: '10px', paddingRight: '12px'}}
+      >
+        <span className="text-white font-bold text-base">{value}</span>
+        <div className="flex items-center gap-2">
+          {dayName && <span className="text-amber-400 font-bold text-sm">({dayName})</span>}
+          <span className="text-gray-500 text-base">📅</span>
+        </div>
+      </div>
+
+      {/* 달력 팝업 */}
+      {show && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShow(false)} />
+          <div className="absolute left-0 right-0 z-50 bg-gray-900 border border-gray-700 rounded-md mt-1 p-3" style={{top: '100%'}}>
+            {/* 월 이동 */}
+            <div className="flex items-center justify-between mb-2">
+              <button type="button" onClick={prevMonth} className="text-gray-400 text-xl px-2 py-1 hover:text-white">‹</button>
+              <span className="text-white font-black text-sm">{year}년 {month+1}월</span>
+              <button type="button" onClick={nextMonth} className="text-gray-400 text-xl px-2 py-1 hover:text-white">›</button>
+            </div>
+            {/* 요일 헤더 */}
+            <div className="grid grid-cols-7 mb-1">
+              {WEEKDAYS_SHORT.map((w, i) => (
+                <div key={w} className={`text-center text-xs font-black pb-1 ${i===0?'text-red-400':i===6?'text-blue-400':'text-gray-500'}`}>{w}</div>
+              ))}
+            </div>
+            {/* 날짜 셀 */}
+            <div className="grid grid-cols-7 gap-y-0.5">
+              {cells.map((day, idx) => {
+                if (!day) return <div key={`e-${idx}`} />
+                const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+                const isSelected = dateStr === value
+                const isToday = dateStr === todayStr
+                const col = idx % 7
+                return (
+                  <button
+                    key={dateStr}
+                    type="button"
+                    onClick={() => handleSelect(day)}
+                    style={isSelected ? {backgroundColor:'#fbbf24', color:'#000'} : {}}
+                    className={`text-sm font-bold py-1.5 rounded-md transition
+                      ${isSelected ? '' : isToday ? 'bg-gray-700 text-amber-400' : 'hover:bg-gray-700'}
+                      ${!isSelected && !isToday ? (col===0?'text-red-400':col===6?'text-blue-400':'text-gray-300') : ''}`}
+                  >
+                    {day}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 function TTSToggle({ enabled, speaking, onToggle, onSpeak, hasFeedback }) {
   return (
     <div className="flex items-center gap-2">
@@ -237,12 +327,9 @@ export default function DiaryWritePage() {
         {/* 날짜 */}
         <div className="flex flex-col gap-1">
           <label className="text-gray-500 font-bold text-sm">날짜</label>
-          <input
-            type="date"
+          <DatePicker
             value={form.diary_date}
-            onChange={(e) => setForm({ ...form, diary_date: e.target.value })}
-            className="bg-gray-900 border border-gray-800 rounded-md py-3 text-base text-white font-bold focus:outline-none focus:border-amber-400"
-            style={{paddingLeft: '10px'}}
+            onChange={(date) => setForm({ ...form, diary_date: date })}
           />
         </div>
 
