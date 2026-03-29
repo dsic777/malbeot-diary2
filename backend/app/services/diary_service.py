@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, or_
 from fastapi import HTTPException, status
 import uuid
 
@@ -91,6 +91,27 @@ class DiaryService:
         await db.commit()
         await db.refresh(diary)
         return diary
+
+    # ── 검색 (제목 + 내용) ──────────────────────────
+    async def search_diaries(
+        self,
+        db: AsyncSession,
+        user_id: uuid.UUID,
+        keyword: str,
+    ) -> List[Diary]:
+        stmt = (
+            select(Diary)
+            .where(
+                Diary.user_id == user_id,
+                or_(
+                    Diary.title.ilike(f"%{keyword}%"),
+                    Diary.content.ilike(f"%{keyword}%"),
+                )
+            )
+            .order_by(desc(Diary.diary_date))
+        )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())
 
     # ── 삭제 ────────────────────────────────────────
     async def delete_diary(self, db: AsyncSession, diary: Diary) -> None:

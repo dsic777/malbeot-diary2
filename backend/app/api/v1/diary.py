@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 import uuid
@@ -30,6 +30,16 @@ async def create_diary(
     current_user: User = Depends(get_current_user),
 ):
     return await diary_svc.create_diary(db, current_user.id, body)
+
+
+# ── GET /diaries/search ─ 검색 (반드시 /{diary_id} 앞에 위치) ──
+@router.get("/search", response_model=List[DiaryListResponse])
+async def search_diaries(
+    q: str = Query(..., min_length=1),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return await diary_svc.search_diaries(db, current_user.id, q)
 
 
 # ── GET /diaries/{diary_id} ─ 단건 조회 ────────────

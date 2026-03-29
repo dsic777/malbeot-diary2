@@ -36,6 +36,7 @@ export default function LoginPage() {
             <span className="text-gray-500 font-bold">내 손 안의 </span>
             <span className="text-amber-400 font-black text-xl">절친</span>
           </p>
+          <p className="text-sm mt-2" style={{color: 'rgb(44, 173, 100)'}}>나만의 일기와 메모를 남겨보세요.</p>
         </div>
 
         {/* 로그인 폼 */}
