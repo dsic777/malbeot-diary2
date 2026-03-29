@@ -232,7 +232,7 @@ export default function DiaryWritePage() {
         <div style={{width: '40px'}} />
       </header>
 
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col py-4 gap-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
         {/* 날짜 */}
         <div className="flex flex-col gap-1">
           <label className="text-gray-500 font-bold text-sm">날짜</label>
@@ -272,7 +272,7 @@ export default function DiaryWritePage() {
                     borderColor: EMOTION_COLOR[em],
                     color: '#000',
                   } : {}}
-                  className={`px-3 py-1.5 rounded-full text-sm font-bold border transition
+                  className={`pl-3 pr-4 py-1.5 rounded-full text-sm font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {EMOTION_EMOJI[em]} {em}
@@ -296,7 +296,7 @@ export default function DiaryWritePage() {
                     borderColor: WEATHER_COLOR[w],
                     color: '#000',
                   } : {}}
-                  className={`px-3 py-1.5 rounded-full text-sm font-bold border transition
+                  className={`pl-3 pr-4 py-1.5 rounded-full text-sm font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {WEATHER_EMOJI[w]} {w}
@@ -328,9 +328,8 @@ export default function DiaryWritePage() {
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             placeholder="오늘 있었던 일을 자유롭게 적어보세요..."
-            rows={7}
             className="bg-gray-900 border border-gray-800 rounded-md py-3 text-base text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400 resize-none"
-            style={{paddingLeft: '10px'}}
+            style={{paddingLeft: '10px', paddingRight: '10px', flex: 1, minHeight: '120px'}}
           />
         </div>
 
