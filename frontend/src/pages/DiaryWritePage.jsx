@@ -277,9 +277,19 @@ export default function DiaryWritePage() {
     setLoading(true); setError('')
     try {
       if (isEdit) {
-        // 수정 모드: PATCH 후 상세 화면으로 이동
+        // 수정 모드: PATCH 후 피드백 재생성
         await api.patch(`/diaries/${editDiary.id}`, form)
-        navigate(`/diary/${editDiary.id}`)
+        setSavedDiary({ ...editDiary, ...form })
+        setFeedbackLoading(true)
+        try {
+          const result = await api.delete(`/feedback/${editDiary.id}`)
+          setAiFeedback(result.ai_feedback)
+          if (enabled) speak(result.ai_feedback)
+        } catch {
+          setAiFeedback('')
+        } finally {
+          setFeedbackLoading(false)
+        }
       } else {
         // 신규 작성: POST 후 피드백 화면
         const diary = await api.post('/diaries/', form)
@@ -325,7 +335,7 @@ export default function DiaryWritePage() {
         <div className="flex-1 flex flex-col gap-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
           {/* 저장 완료 메시지 */}
           <div className="bg-gray-900 border border-gray-800 rounded-md p-4 text-center">
-            <p className="text-green-400 font-black text-base">✅ 이야기가 저장되었어요</p>
+            <p className="text-green-400 font-black text-base">{isEdit ? '✅ 이야기가 수정되었어요' : '✅ 이야기가 저장되었어요'}</p>
             <p className="text-gray-600 font-bold text-sm mt-1">{savedDiary.diary_date}</p>
           </div>
 
