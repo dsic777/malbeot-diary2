@@ -378,10 +378,10 @@ export default function DiaryWritePage() {
         <div style={{width: '40px'}} />
       </header>
 
-      <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
+      <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '12px', paddingBottom: '12px'}}>
         {/* 날짜 */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500 font-bold text-sm">날짜</label>
+          <label className="text-gray-500 font-bold text-xs">날짜</label>
           <DatePicker
             value={form.diary_date}
             onChange={(date) => setForm({ ...form, diary_date: date })}
@@ -391,10 +391,10 @@ export default function DiaryWritePage() {
         {/* 제목 */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <label className="text-gray-500 font-bold text-sm">제목 (선택)</label>
+            <label className="text-gray-500 font-bold text-xs">제목 (선택)</label>
             <button type="button"
               onClick={() => isListening && voiceTarget === 'title' ? stopVoice() : startVoice('title')}
-              className={`px-3 py-1 rounded-md text-sm font-black transition
+              className={`px-2 py-0.5 rounded-md text-xs font-black transition
                 ${isListening && voiceTarget === 'title' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
             >
               🎤 {isListening && voiceTarget === 'title' ? '중지' : '말로 쓰기'}
@@ -405,15 +405,15 @@ export default function DiaryWritePage() {
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="제목을 입력하세요"
-            className="bg-gray-900 border border-gray-800 rounded-md py-3 text-base text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
+            className="bg-gray-900 border border-gray-800 rounded-md py-2 text-sm text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
             style={{paddingLeft: '10px'}}
           />
         </div>
 
         {/* 감정 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-gray-500 font-bold text-sm">오늘의 감정</label>
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-gray-500 font-bold text-xs">오늘의 감정</label>
+          <div className="flex flex-wrap gap-1.5">
             {EMOTIONS.map((em) => {
               const selected = form.emotion === em
               return (
@@ -424,7 +424,7 @@ export default function DiaryWritePage() {
                     borderColor: EMOTION_COLOR[em],
                     color: '#000',
                   } : {}}
-                  className={`pl-3 pr-4 py-1.5 rounded-full text-sm font-bold border transition
+                  className={`pl-2 pr-3 py-1 rounded-full text-xs font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {EMOTION_EMOJI[em]} {em}
@@ -435,9 +435,9 @@ export default function DiaryWritePage() {
         </div>
 
         {/* 날씨 */}
-        <div className="flex flex-col gap-2">
-          <label className="text-gray-500 font-bold text-sm">오늘의 날씨</label>
-          <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-gray-500 font-bold text-xs">오늘의 날씨</label>
+          <div className="flex flex-wrap gap-1.5">
             {WEATHERS.map((w) => {
               const selected = form.weather === w
               return (
@@ -448,7 +448,7 @@ export default function DiaryWritePage() {
                     borderColor: WEATHER_COLOR[w],
                     color: '#000',
                   } : {}}
-                  className={`pl-3 pr-4 py-1.5 rounded-full text-sm font-bold border transition
+                  className={`pl-2 pr-3 py-1 rounded-full text-xs font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {WEATHER_EMOJI[w]} {w}
@@ -459,11 +459,11 @@ export default function DiaryWritePage() {
         </div>
 
         {/* 내용 + 음성 */}
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-1 flex-1">
           <div className="flex items-center justify-between">
-            <label className="text-gray-500 font-bold text-sm">오늘의 이야기 <span className="text-red-500">*</span></label>
+            <label className="text-gray-500 font-bold text-xs">오늘의 이야기 <span className="text-red-500">*</span></label>
             <button type="button" onClick={() => isListening && voiceTarget === 'content' ? stopVoice() : startVoice('content')}
-              className={`px-3 py-1 rounded-md text-sm font-black transition
+              className={`px-2 py-0.5 rounded-md text-xs font-black transition
                 ${isListening && voiceTarget === 'content' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
             >
               🎤 {isListening && voiceTarget === 'content' ? '중지' : '말로 쓰기'}
@@ -471,7 +471,7 @@ export default function DiaryWritePage() {
           </div>
 
           {voiceStatus && (
-            <p className={`text-sm font-bold px-3 py-2 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
+            <p className={`text-xs font-bold px-2 py-1 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
               {voiceStatus}
             </p>
           )}
