@@ -22,6 +22,11 @@ frontend/.vite/
 *.txt
 !**/requirements*.txt
 
+# 개발 문서 (README.md, 개발과정.md 제외)
+*.md
+!README.md
+!개발과정.md
+
 # OS
 .DS_Store
 Thumbs.db
