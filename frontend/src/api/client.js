@@ -1,4 +1,4 @@
-const BASE_URL = '/api/v1'
+const BASE_URL = '/malbeot/api/v1'
 
 function getToken() {
   return localStorage.getItem('access_token')
@@ -16,7 +16,7 @@ async function request(path, options = {}) {
 
   if (res.status === 401) {
     localStorage.removeItem('access_token')
-    window.location.href = '/login'
+    window.location.href = '/malbeot/login'
     return
   }
 
