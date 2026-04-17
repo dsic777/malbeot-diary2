@@ -22,7 +22,10 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err.detail || '요청에 실패했습니다.')
+    const detail = Array.isArray(err.detail)
+      ? err.detail.map((e) => e.msg).join(', ')
+      : err.detail
+    throw new Error(detail || '요청에 실패했습니다.')
   }
 
   if (res.status === 204) return null

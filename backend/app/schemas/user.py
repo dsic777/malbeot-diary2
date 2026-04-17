@@ -7,7 +7,7 @@ import uuid
 # ── 회원가입 요청 ──────────────────────────────────
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50)   # 로그인 아이디
-    password: str = Field(min_length=8)                   # 비밀번호 (8자 이상)
+    password: str = Field(min_length=4)                   # 비밀번호 (4자 이상)
     nickname: str = Field(min_length=1, max_length=50)   # 화면 표시 이름
 
 
