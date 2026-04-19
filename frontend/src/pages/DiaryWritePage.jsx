@@ -256,23 +256,24 @@ export default function DiaryWritePage() {
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
-    recognition.continuous = false
+    recognition.continuous = true   // 한 세션 유지 — 재시작 없음, 경고음 없음
     recognition.interimResults = true
     recognitionRef.current = recognition
+
+    // 타이머는 startVoice에서 딱 한 번만 시작
+    clearVoiceTimeout()
+    voiceTimeoutRef.current = setTimeout(() => {
+      killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+    }, 20000)
 
     recognition.onstart = () => {
       if (voiceStoppedRef.current) return
       setIsListening(true)
       setVoiceStatus('듣고 있어요... 🎤')
-      // 10초 타이머
-      clearVoiceTimeout()
-      voiceTimeoutRef.current = setTimeout(() => {
-        killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-      }, 20000)
     }
     recognition.onresult = (event) => {
       if (voiceStoppedRef.current) return
-      // 음성 감지 시 타이머 리셋 (말하는 중에는 계속 연장)
+      // 말할 때마다 타이머 20초 리셋
       clearVoiceTimeout()
       voiceTimeoutRef.current = setTimeout(() => {
         killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
@@ -297,13 +298,12 @@ export default function DiaryWritePage() {
     }
     recognition.onerror = (e) => {
       if (voiceStoppedRef.current) return
-      if (e.error !== 'no-speech') killVoice('다시 시도해주세요.')
-      // no-speech는 onend에서 재시작 처리
+      if (e.error === 'no-speech') return  // 타이머가 처리
+      killVoice('다시 시도해주세요.')
     }
     recognition.onend = () => {
       if (voiceStoppedRef.current) return
-      // 20초 타이머가 살아있는 동안 계속 재시작
-      try { recognition.start() } catch (_) { killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.') }
+      killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.')
     }
     try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
   }
