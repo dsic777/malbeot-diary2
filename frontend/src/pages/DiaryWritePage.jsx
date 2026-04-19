@@ -276,8 +276,11 @@ export default function DiaryWritePage() {
         if (event.results[i].isFinal) finalText += event.results[i][0].transcript
         else interim += event.results[i][0].transcript
       }
+      if (interim) {
+        startTimer()  // 말하는 중(interim)에만 타이머 리셋 — startup sound final은 리셋 안 함
+        setVoiceStatus(`인식 중: ${interim}`)
+      }
       if (finalText) {
-        startTimer()  // 실제 발화 확정 시에만 타이머 리셋
         const text = finalText.trim()
         if (target === 'title') {
           setForm((prev) => ({
@@ -292,7 +295,6 @@ export default function DiaryWritePage() {
           }))
         }
       }
-      if (interim) setVoiceStatus(`인식 중: ${interim}`)
     }
     recognition.onerror = (e) => {
       if (e.error === 'no-speech') return
