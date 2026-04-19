@@ -21,14 +21,14 @@ function DiaryCard({ diary, onClick }) {
       className="bg-gray-900 border border-gray-800 rounded-md p-4 cursor-pointer hover:border-gray-600 transition"
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-500 font-bold text-lg">{diary.diary_date}</span>
+        <span className="text-gray-500 font-bold text-xl">{diary.diary_date}</span>
         <div className="flex gap-2 text-2xl">
           <span>{INPUT_ICON[diary.input_type] || '📝'}</span>
           {diary.emotion && <span>{EMOTION_EMOJI[diary.emotion]}</span>}
           {diary.weather && <span>{WEATHER_EMOJI[diary.weather]}</span>}
         </div>
       </div>
-      <p className="font-black text-white text-lg">
+      <p className="font-black text-white text-xl">
         {diary.title || '제목 없음'}
       </p>
     </div>
@@ -99,7 +99,7 @@ function CalendarView({ diaries, onDiaryClick }) {
       {/* 월 이동 헤더 */}
       <div className="flex items-center justify-between mb-4" style={{paddingLeft: '8px', paddingRight: '8px'}}>
         <button onClick={prevMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👈</button>
-        <span className="text-white font-black text-lg">{year}년 {month + 1}월</span>
+        <span className="text-white font-black text-xl">{year}년 {month + 1}월</span>
         <button onClick={nextMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👉</button>
       </div>
 
@@ -108,7 +108,7 @@ function CalendarView({ diaries, onDiaryClick }) {
         {WEEKDAYS.map((w, i) => (
           <div
             key={w}
-            className={`text-center text-lg font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
+            className={`text-center text-xl font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
           >
             {w}
           </div>
@@ -150,7 +150,7 @@ function CalendarView({ diaries, onDiaryClick }) {
               className="flex flex-col items-center pt-1.5 pb-1 cursor-pointer transition hover:opacity-75"
             >
               {/* 날짜 숫자 */}
-              <span className={`text-lg font-bold leading-tight
+              <span className={`text-xl font-bold leading-tight
                 ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
               >
                 {day}
@@ -168,7 +168,7 @@ function CalendarView({ diaries, onDiaryClick }) {
                     )}
                   </div>
                   {/* 건수 */}
-                  <span className={`text-sm font-black mt-0.5 leading-none
+                  <span className={`text-base font-black mt-0.5 leading-none
                     ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}
                   >
                     {count}건
@@ -185,7 +185,7 @@ function CalendarView({ diaries, onDiaryClick }) {
       {/* 선택된 날짜 일기 목록 */}
       {selectedDate && (
         <div className="mt-4">
-          <p className="text-gray-500 font-bold text-sm mb-2">
+          <p className="text-gray-500 font-bold text-base mb-2">
             {selectedDate} ({selectedDiaries.length}건)
           </p>
           {selectedDiaries.length === 0 ? (
@@ -292,7 +292,7 @@ export default function DiaryListPage() {
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="제목 또는 내용 검색..."
-                className="flex-1 bg-transparent text-xl text-white font-bold placeholder-gray-600 focus:outline-none"
+                className="flex-1 bg-transparent text-2xl text-white font-bold placeholder-gray-600 focus:outline-none"
                 style={{paddingTop: '12px', paddingBottom: '12px'}}
               />
               {keyword && (
@@ -309,7 +309,7 @@ export default function DiaryListPage() {
             </button>
           </div>
           {searchResults !== null && (
-            <p className="text-gray-600 font-bold text-sm" style={{marginTop: '8px'}}>
+            <p className="text-gray-600 font-bold text-base" style={{marginTop: '8px'}}>
               "{keyword}" 검색 결과 {searchResults.length}건
             </p>
           )}
