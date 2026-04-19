@@ -264,13 +264,17 @@ export default function DiaryWritePage() {
     }
     recognition.onresult = (event) => {
       if (voiceStoppedRef.current) return
+      // 음성 감지 시 타이머 리셋 (말하는 중에는 계속 연장)
+      clearVoiceTimeout()
+      voiceTimeoutRef.current = setTimeout(() => {
+        killVoice('⏱ 10초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+      }, 10000)
       let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
         if (event.results[i].isFinal) finalText += event.results[i][0].transcript
         else interim += event.results[i][0].transcript
       }
       if (finalText) {
-        clearVoiceTimeout()
         if (target === 'title') {
           setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
         } else {
