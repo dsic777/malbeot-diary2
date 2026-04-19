@@ -21,14 +21,14 @@ function DiaryCard({ diary, onClick }) {
       className="bg-gray-900 border border-gray-800 rounded-md p-4 cursor-pointer hover:border-gray-600 transition"
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-500 font-bold text-sm">{diary.diary_date}</span>
-        <div className="flex gap-2 text-xl">
+        <span className="text-gray-500 font-bold text-base">{diary.diary_date}</span>
+        <div className="flex gap-2 text-2xl">
           <span>{INPUT_ICON[diary.input_type] || '📝'}</span>
           {diary.emotion && <span>{EMOTION_EMOJI[diary.emotion]}</span>}
           {diary.weather && <span>{WEATHER_EMOJI[diary.weather]}</span>}
         </div>
       </div>
-      <p className="font-black text-white text-base">
+      <p className="font-black text-white text-lg">
         {diary.title || '제목 없음'}
       </p>
     </div>
@@ -99,7 +99,7 @@ function CalendarView({ diaries, onDiaryClick }) {
       {/* 월 이동 헤더 */}
       <div className="flex items-center justify-between mb-4" style={{paddingLeft: '8px', paddingRight: '8px'}}>
         <button onClick={prevMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👈</button>
-        <span className="text-white font-black text-base">{year}년 {month + 1}월</span>
+        <span className="text-white font-black text-lg">{year}년 {month + 1}월</span>
         <button onClick={nextMonth} className="text-2xl px-2 py-1 transition hover:opacity-60">👉</button>
       </div>
 
@@ -108,7 +108,7 @@ function CalendarView({ diaries, onDiaryClick }) {
         {WEEKDAYS.map((w, i) => (
           <div
             key={w}
-            className={`text-center text-xs font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
+            className={`text-center text-sm font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
           >
             {w}
           </div>
@@ -150,7 +150,7 @@ function CalendarView({ diaries, onDiaryClick }) {
               className="flex flex-col items-center pt-1.5 pb-1 cursor-pointer transition hover:opacity-75"
             >
               {/* 날짜 숫자 */}
-              <span className={`text-sm font-bold leading-tight
+              <span className={`text-base font-bold leading-tight
                 ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
               >
                 {day}
@@ -161,14 +161,14 @@ function CalendarView({ diaries, onDiaryClick }) {
                   {/* 감정 + 날씨 이모지 */}
                   <div className="flex items-center justify-center gap-0.5 mt-1 leading-none">
                     {firstDiary?.emotion && (
-                      <span style={{fontSize: '14px'}}>{EMOTION_EMOJI[firstDiary.emotion]}</span>
+                      <span style={{fontSize: '17px'}}>{EMOTION_EMOJI[firstDiary.emotion]}</span>
                     )}
                     {firstDiary?.weather && (
-                      <span style={{fontSize: '14px'}}>{WEATHER_EMOJI[firstDiary.weather]}</span>
+                      <span style={{fontSize: '17px'}}>{WEATHER_EMOJI[firstDiary.weather]}</span>
                     )}
                   </div>
                   {/* 건수 */}
-                  <span className={`text-xs font-black mt-0.5 leading-none
+                  <span className={`text-sm font-black mt-0.5 leading-none
                     ${isSelected ? 'text-blue-200' : 'text-gray-500'}`}
                   >
                     {count}건
@@ -185,11 +185,11 @@ function CalendarView({ diaries, onDiaryClick }) {
       {/* 선택된 날짜 일기 목록 */}
       {selectedDate && (
         <div className="mt-4">
-          <p className="text-gray-500 font-bold text-xs mb-2">
+          <p className="text-gray-500 font-bold text-sm mb-2">
             {selectedDate} ({selectedDiaries.length}건)
           </p>
           {selectedDiaries.length === 0 ? (
-            <p className="text-gray-600 font-bold text-sm text-center py-4">이 날의 기록이 없어요</p>
+            <p className="text-gray-600 font-bold text-base text-center py-4">이 날의 기록이 없어요</p>
           ) : (
             <div className="flex flex-col gap-3">
               {selectedDiaries.map((d) => (
@@ -255,10 +255,10 @@ export default function DiaryListPage() {
     <div className="flex-1 bg-black flex flex-col overflow-hidden">
       {/* 헤더 */}
       <header className="bg-black border-b border-gray-800 px-5 flex items-center justify-between sticky top-0 z-10" style={{paddingTop: '18px', paddingBottom: '18px'}}>
-        <h1 className="text-lg font-black text-white" style={{marginLeft: '10px'}}>🌿 말벗이 내 손 안에</h1>
+        <h1 className="text-xl font-black text-white" style={{marginLeft: '10px'}}>🌿 말벗이 내 손 안에</h1>
         <div className="flex items-center gap-3" style={{marginRight: '20px'}}>
-          <button onClick={() => navigate('/personas')} className="text-gray-400 font-bold text-sm">🎭 말벗</button>
-          <button onClick={handleLogout} className="text-gray-500 font-bold text-sm">로그아웃</button>
+          <button onClick={() => navigate('/personas')} className="text-gray-400 font-bold text-base">🎭 말벗</button>
+          <button onClick={handleLogout} className="text-gray-500 font-bold text-base">로그아웃</button>
         </div>
       </header>
 
@@ -266,13 +266,13 @@ export default function DiaryListPage() {
       <div className="bg-black border-b border-gray-800 flex" style={{paddingLeft: '15px', paddingRight: '15px'}}>
         <button
           onClick={() => setTab('list')}
-          className={`flex-1 py-3 text-sm font-black transition border-b-2 ${tab === 'list' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          className={`flex-1 py-3 text-base font-black transition border-b-2 ${tab === 'list' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
         >
           📋 목록
         </button>
         <button
           onClick={() => setTab('calendar')}
-          className={`flex-1 py-3 text-sm font-black transition border-b-2 ${tab === 'calendar' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          className={`flex-1 py-3 text-base font-black transition border-b-2 ${tab === 'calendar' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
         >
           📅 캘린더
         </button>
@@ -290,7 +290,7 @@ export default function DiaryListPage() {
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="제목 또는 내용 검색..."
-                className="flex-1 bg-transparent text-sm text-white font-bold placeholder-gray-600 focus:outline-none"
+                className="flex-1 bg-transparent text-base text-white font-bold placeholder-gray-600 focus:outline-none"
                 style={{paddingTop: '12px', paddingBottom: '12px'}}
               />
               {keyword && (
@@ -300,14 +300,14 @@ export default function DiaryListPage() {
             <button
               onClick={handleSearch}
               disabled={searching}
-              className="text-white font-black text-sm rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
+              className="text-white font-black text-base rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
               style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(52, 145, 217, 0.99)' }}
             >
               {searching ? '...' : '검 색'}
             </button>
           </div>
           {searchResults !== null && (
-            <p className="text-gray-600 font-bold text-xs" style={{marginTop: '8px'}}>
+            <p className="text-gray-600 font-bold text-sm" style={{marginTop: '8px'}}>
               "{keyword}" 검색 결과 {searchResults.length}건
             </p>
           )}
@@ -323,10 +323,10 @@ export default function DiaryListPage() {
         ) : displayList.length === 0 ? (
           <div className="text-center mt-20 text-gray-600">
             <div className="text-5xl mb-4">{searchResults !== null ? '🔍' : '📓'}</div>
-            <p className="text-lg font-black text-gray-400">
+            <p className="text-xl font-black text-gray-400">
               {searchResults !== null ? '검색 결과가 없어요' : '아직 작성한 기록이 없어요'}
             </p>
-            <p className="text-base font-bold mt-1 text-gray-600">
+            <p className="text-lg font-bold mt-1 text-gray-600">
               {searchResults !== null ? '다른 키워드로 검색해 보세요' : '오늘의 이야기를 들려주세요'}
             </p>
           </div>
@@ -347,7 +347,7 @@ export default function DiaryListPage() {
       <div className="border-t border-gray-800" style={{paddingTop: '16px', paddingBottom: '20px', paddingLeft: '10px', paddingRight: '10px'}}>
         <button
           onClick={() => navigate('/write')}
-          className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg transition"
+          className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md text-xl transition" style={{height: '50px'}}
         >
           🎤 오늘 이야기 남기기
         </button>
