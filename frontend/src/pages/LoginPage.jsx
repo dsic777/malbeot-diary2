@@ -51,7 +51,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="아이디를 입력하세요"
               autoComplete="off"
-              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '64px', paddingLeft: '10px'}}
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '54px', paddingLeft: '10px'}}
               required
             />
           </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="비밀번호를 입력하세요"
               autoComplete="new-password"
-              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '64px', paddingLeft: '10px'}}
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '54px', paddingLeft: '10px'}}
               required
             />
           </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-400 hover:bg-green-500 text-white font-black rounded-md text-xl disabled:opacity-40 transition" style={{height: '64px'}}
+              className="w-full font-black rounded-md disabled:opacity-40 transition" style={{height: '58px', backgroundColor: 'rgb(74, 222, 128)', color: 'rgb(255, 255, 255)', fontSize: '28px'}}
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
