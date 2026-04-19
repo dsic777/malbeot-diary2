@@ -203,7 +203,8 @@ export default function DiaryWritePage() {
   const recognitionRef = useRef(null)
   const voiceTimeoutRef = useRef(null)
   const voiceStoppedRef = useRef(false)
-  const lastResultIdxRef = useRef(0)
+  const sessionIdRef = useRef(0)
+  const addedTextsRef = useRef(new Set())
   const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
@@ -211,6 +212,7 @@ export default function DiaryWritePage() {
   }
 
   const killVoice = (statusMsg) => {
+    sessionIdRef.current += 1  // 모든 콜백 무효화
     voiceStoppedRef.current = true
     clearVoiceTimeout()
     if (recognitionRef.current) {
@@ -251,63 +253,75 @@ export default function DiaryWritePage() {
       setVoiceStatus('크롬 브라우저를 사용해주세요.')
       return
     }
-    killVoice('')  // 기존 인식 완전 종료
+    killVoice('')  // 기존 세션 종료 + sessionId 증가
     voiceStoppedRef.current = false
-    lastResultIdxRef.current = 0
+    sessionIdRef.current += 1
+    const mySession = sessionIdRef.current
+    addedTextsRef.current = new Set()
     setVoiceTarget(target)
 
-    const recognition = new SpeechRecognition()
-    recognition.lang = 'ko-KR'
-    recognition.continuous = true   // 단일 세션 — 재시작/경고음 없음
-    recognition.interimResults = true
-    recognitionRef.current = recognition
-
-    // 타이머 딱 한 번, 절대 리셋 안 함
+    // 타이머 딱 한 번 — 절대 리셋 안 함
     clearVoiceTimeout()
     voiceTimeoutRef.current = setTimeout(() => {
+      if (sessionIdRef.current !== mySession) return
       killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
     }, 20000)
 
-    recognition.onstart = () => {
-      if (voiceStoppedRef.current) return
-      setIsListening(true)
-      setVoiceStatus('듣고 있어요... 🎤')
-    }
-    recognition.onresult = (event) => {
-      if (voiceStoppedRef.current) return
-      let finalText = '', interim = ''
-      for (let i = lastResultIdxRef.current; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalText += event.results[i][0].transcript
-          lastResultIdxRef.current = i + 1
-        } else {
-          interim += event.results[i][0].transcript
-        }
+    const startSession = () => {
+      if (sessionIdRef.current !== mySession) return
+
+      const rec = new SpeechRecognition()
+      rec.lang = 'ko-KR'
+      rec.continuous = true
+      rec.interimResults = true
+      recognitionRef.current = rec
+
+      rec.onstart = () => {
+        if (sessionIdRef.current !== mySession) return
+        setIsListening(true)
+        setVoiceStatus('듣고 있어요... 🎤')
       }
-      if (finalText) {
-        if (target === 'title') {
-          setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
-        } else {
-          setForm((prev) => ({
-            ...prev,
-            content: prev.content + (prev.content ? ' ' : '') + finalText,
-            input_type: 'voice',
-          }))
+      rec.onresult = (event) => {
+        if (sessionIdRef.current !== mySession) return
+        let finalText = '', interim = ''
+        for (let i = 0; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            const text = event.results[i][0].transcript.trim()
+            if (text && !addedTextsRef.current.has(text)) {
+              addedTextsRef.current.add(text)
+              finalText += (finalText ? ' ' : '') + text
+            }
+          } else {
+            interim += event.results[i][0].transcript
+          }
         }
+        if (finalText) {
+          if (target === 'title') {
+            setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
+          } else {
+            setForm((prev) => ({
+              ...prev,
+              content: prev.content + (prev.content ? ' ' : '') + finalText,
+              input_type: 'voice',
+            }))
+          }
+        }
+        if (interim) setVoiceStatus(`인식 중: ${interim}`)
       }
-      if (interim) setVoiceStatus(`인식 중: ${interim}`)
+      rec.onerror = (e) => {
+        if (sessionIdRef.current !== mySession) return
+        if (e.error === 'no-speech') return
+        killVoice('다시 시도해주세요.')
+      }
+      rec.onend = () => {
+        if (sessionIdRef.current !== mySession) return
+        // Android 강제 종료 시 새 recognition 객체로 재시작
+        setTimeout(() => startSession(), 100)
+      }
+      try { rec.start() } catch (_) { killVoice('') }
     }
-    recognition.onerror = (e) => {
-      if (voiceStoppedRef.current) return
-      if (e.error === 'no-speech') return  // continuous=true라 타이머가 처리
-      killVoice('다시 시도해주세요.')
-    }
-    recognition.onend = () => {
-      if (voiceStoppedRef.current) return
-      // Android가 강제 종료한 경우만 재시작 (lastResultIdxRef 유지)
-      try { recognition.start() } catch (_) { killVoice('') }
-    }
-    try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
+
+    startSession()
   }
 
   const handleSubmit = async (e) => {
