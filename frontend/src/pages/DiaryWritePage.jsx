@@ -297,15 +297,13 @@ export default function DiaryWritePage() {
     }
     recognition.onerror = (e) => {
       if (voiceStoppedRef.current) return
-      if (e.error === 'no-speech') {
-        killVoice('⏱ 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-      } else {
-        killVoice('다시 시도해주세요.')
-      }
+      if (e.error !== 'no-speech') killVoice('다시 시도해주세요.')
+      // no-speech는 onend에서 재시작 처리
     }
     recognition.onend = () => {
       if (voiceStoppedRef.current) return
-      killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.')
+      // 20초 타이머가 살아있는 동안 계속 재시작
+      try { recognition.start() } catch (_) { killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.') }
     }
     try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
   }
