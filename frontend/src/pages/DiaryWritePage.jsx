@@ -275,11 +275,11 @@ export default function DiaryWritePage() {
     }
     recognition.onresult = (event) => {
       if (voiceStoppedRef.current) return
-      // 말할 때마다 타이머 20초 리셋
+      // 말한 후에는 5초 침묵이면 종료 (초기 20초 대기와 구분)
       clearVoiceTimeout()
       voiceTimeoutRef.current = setTimeout(() => {
-        killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-      }, 20000)
+        killVoice('⏱ 종료됐어요. 버튼을 다시 누르세요.')
+      }, 5000)
       // continuous=false: 세션당 결과 하나 — 중복 없음
       let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
