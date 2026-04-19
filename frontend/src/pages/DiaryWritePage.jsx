@@ -258,11 +258,11 @@ export default function DiaryWritePage() {
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
-    recognition.continuous = true   // 한 세션 유지 — 재시작 없음, 경고음 없음
+    recognition.continuous = false  // 한 문장씩 처리 — 중복 방지
     recognition.interimResults = true
     recognitionRef.current = recognition
 
-    // 타이머는 startVoice에서 딱 한 번만 시작
+    // 타이머는 딱 한 번만 시작 — onstart 재시작으로 리셋 안 됨
     clearVoiceTimeout()
     voiceTimeoutRef.current = setTimeout(() => {
       killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
@@ -280,14 +280,11 @@ export default function DiaryWritePage() {
       voiceTimeoutRef.current = setTimeout(() => {
         killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
       }, 20000)
+      // continuous=false: 세션당 결과 하나 — 중복 없음
       let finalText = '', interim = ''
-      for (let i = lastResultIdxRef.current; i < event.results.length; i++) {
-        if (event.results[i].isFinal) {
-          finalText += event.results[i][0].transcript
-          lastResultIdxRef.current = i + 1  // 처리 완료된 결과는 다시 읽지 않음
-        } else {
-          interim += event.results[i][0].transcript
-        }
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) finalText += event.results[i][0].transcript
+        else interim += event.results[i][0].transcript
       }
       if (finalText) {
         if (target === 'title') {
@@ -304,12 +301,13 @@ export default function DiaryWritePage() {
     }
     recognition.onerror = (e) => {
       if (voiceStoppedRef.current) return
-      if (e.error === 'no-speech') return  // 타이머가 처리
+      if (e.error === 'no-speech') return  // onend에서 재시작 처리
       killVoice('다시 시도해주세요.')
     }
     recognition.onend = () => {
       if (voiceStoppedRef.current) return
-      killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.')
+      // 타이머가 살아있는 동안 계속 재시작 (20초 대기)
+      try { recognition.start() } catch (_) { killVoice('') }
     }
     try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
   }
