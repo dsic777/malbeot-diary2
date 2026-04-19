@@ -284,27 +284,38 @@ export default function DiaryWritePage() {
       }
       rec.onresult = (event) => {
         if (sessionIdRef.current !== mySession) return
-        let finalText = '', interim = ''
+        let interim = ''
         for (let i = 0; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
-            const text = event.results[i][0].transcript.trim().replace(/\s+/g, ' ')
-            if (text && !addedRef.current.has(text)) {
-              addedRef.current.add(text)
-              finalText += (finalText ? ' ' : '') + text
+            // 공백·구두점 정규화
+            const text = event.results[i][0].transcript
+              .trim()
+              .replace(/\s+/g, ' ')
+              .replace(/[.。,，!！?？~]/g, '')
+              .trim()
+            if (!text) continue
+            // Set 중복 체크 (세션 내)
+            if (addedRef.current.has(text)) continue
+            addedRef.current.add(text)
+            // form 상태 기반 이중 체크 (세션 간 — Android 재전송 방어)
+            if (target === 'title') {
+              setForm((prev) => ({
+                ...prev,
+                title: prev.title.includes(text)
+                  ? prev.title
+                  : prev.title + (prev.title ? ' ' : '') + text,
+              }))
+            } else {
+              setForm((prev) => ({
+                ...prev,
+                content: prev.content.includes(text)
+                  ? prev.content
+                  : prev.content + (prev.content ? ' ' : '') + text,
+                input_type: 'voice',
+              }))
             }
           } else {
             interim += event.results[i][0].transcript
-          }
-        }
-        if (finalText) {
-          if (target === 'title') {
-            setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
-          } else {
-            setForm((prev) => ({
-              ...prev,
-              content: prev.content + (prev.content ? ' ' : '') + finalText,
-              input_type: 'voice',
-            }))
           }
         }
         if (interim) setVoiceStatus(`인식 중: ${interim}`)
