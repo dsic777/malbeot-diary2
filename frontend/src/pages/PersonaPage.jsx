@@ -103,7 +103,7 @@ export default function PersonaPage() {
 
         {/* 프리셋 추가 */}
         <div>
-          <p className="text-gray-500 font-bold text-xl mb-3">프리셋 말벗 추가</p>
+          <p className="text-gray-500 font-bold text-2xl mb-3">프리셋 말벗 추가</p>
           <div className="flex flex-col gap-2">
             {PRESETS.map((preset) => {
               const already = personas.some((p) => p.preset_type === preset.preset_type)
@@ -119,12 +119,12 @@ export default function PersonaPage() {
                 >
                   <span className="text-2xl">{preset.icon}</span>
                   <div className="flex-1">
-                    <p className="text-white font-black text-xl">{preset.name}</p>
-                    <p className="text-gray-500 font-bold text-lg mt-0.5">{preset.desc}</p>
+                    <p className="text-white font-black text-2xl">{preset.name}</p>
+                    <p className="text-gray-500 font-bold text-xl mt-0.5">{preset.desc}</p>
                   </div>
                   {already
-                    ? <span className="text-green-500 font-bold text-lg">추가됨</span>
-                    : <span className="text-amber-400 font-bold text-lg">+ 추가</span>
+                    ? <span className="text-green-500 font-bold text-xl">추가됨</span>
+                    : <span className="text-amber-400 font-bold text-xl">+ 추가</span>
                   }
                 </button>
               )
@@ -137,10 +137,10 @@ export default function PersonaPage() {
             >
               <span className="text-2xl">✏️</span>
               <div className="flex-1">
-                <p className="text-white font-black text-xl">직접 설정</p>
-                <p className="text-gray-500 font-bold text-lg mt-0.5">나만의 말벗 캐릭터 만들기</p>
+                <p className="text-white font-black text-2xl">직접 설정</p>
+                <p className="text-gray-500 font-bold text-xl mt-0.5">나만의 말벗 캐릭터 만들기</p>
               </div>
-              <span className="text-amber-400 font-bold text-lg">{showCustomForm ? '▲' : '+ 추가'}</span>
+              <span className="text-amber-400 font-bold text-xl">{showCustomForm ? '▲' : '+ 추가'}</span>
             </button>
 
             {/* 직접 설정 폼 */}
@@ -178,14 +178,14 @@ export default function PersonaPage() {
 
         {/* 내 말벗 목록 */}
         <div>
-          <p className="text-gray-500 font-bold text-xl mb-3">내 말벗 목록</p>
+          <p className="text-gray-500 font-bold text-2xl mb-3">내 말벗 목록</p>
           {loading ? (
-            <p className="text-gray-600 font-bold text-xl text-center py-4">불러오는 중...</p>
+            <p className="text-gray-600 font-bold text-2xl text-center py-4">불러오는 중...</p>
           ) : personas.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               <div className="text-4xl mb-3">🌿</div>
-              <p className="font-bold text-xl">아직 말벗이 없어요</p>
-              <p className="font-bold text-lg mt-1">위에서 말벗을 추가해 보세요</p>
+              <p className="font-bold text-2xl">아직 말벗이 없어요</p>
+              <p className="font-bold text-xl mt-1">위에서 말벗을 추가해 보세요</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -193,14 +193,14 @@ export default function PersonaPage() {
                 <div key={p.id} className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-md p-4">
                   <span className="text-2xl">{getIcon(p)}</span>
                   <div className="flex-1">
-                    <p className="text-white font-black text-xl">{p.name}</p>
+                    <p className="text-white font-black text-2xl">{p.name}</p>
                     {p.custom_description && (
-                      <p className="text-gray-500 font-bold text-lg mt-0.5 line-clamp-1">{p.custom_description}</p>
+                      <p className="text-gray-500 font-bold text-xl mt-0.5 line-clamp-1">{p.custom_description}</p>
                     )}
                   </div>
                   <button
                     onClick={() => handleDelete(p.id)}
-                    className="text-red-500 font-bold text-lg"
+                    className="text-red-500 font-bold text-xl"
                   >
                     삭제
                   </button>

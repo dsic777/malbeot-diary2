@@ -481,7 +481,7 @@ export default function DiaryWritePage() {
           </div>
 
           {voiceStatus && (
-            <p className={`text-lg font-bold px-2 py-1 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
+            <p className={`text-xl font-bold px-2 py-1 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
               {voiceStatus}
             </p>
           )}
@@ -499,8 +499,8 @@ export default function DiaryWritePage() {
         {personas.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-gray-500 font-bold text-xl">말벗 선택 (선택)</label>
-              <button type="button" onClick={() => navigate('/personas')} className="text-amber-400 font-bold text-lg">+ 말벗 관리</button>
+              <label className="text-gray-500 font-bold text-2xl">말벗 선택 (선택)</label>
+              <button type="button" onClick={() => navigate('/personas')} className="text-amber-400 font-bold text-xl">+ 말벗 관리</button>
             </div>
             <div className="flex gap-2 flex-wrap">
               <button
@@ -516,7 +516,7 @@ export default function DiaryWritePage() {
                   key={p.id}
                   type="button"
                   onClick={() => setForm({ ...form, persona_id: form.persona_id === p.id ? null : p.id })}
-                  className={`px-3 py-1 rounded-md text-xl font-bold border transition
+                  className={`px-3 py-1 rounded-md text-2xl font-bold border transition
                     ${form.persona_id === p.id ? 'bg-amber-400 border-amber-400 text-black' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
                 >
                   {PERSONA_ICON[p.preset_type] || '✏️'} {p.name}
@@ -526,7 +526,7 @@ export default function DiaryWritePage() {
           </div>
         )}
 
-        {error && <p className="text-red-400 font-bold text-xl">{error}</p>}
+        {error && <p className="text-red-400 font-bold text-2xl">{error}</p>}
 
         <button type="submit" disabled={loading}
           className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md disabled:opacity-40 transition" style={{height:'50px', fontSize:'24px'}}
