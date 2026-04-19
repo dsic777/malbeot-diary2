@@ -202,15 +202,31 @@ export default function DiaryWritePage() {
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
   const voiceTimeoutRef = useRef(null)
+  const voiceStoppedRef = useRef(false)
   const { enabled, speaking, speak, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
     if (voiceTimeoutRef.current) { clearTimeout(voiceTimeoutRef.current); voiceTimeoutRef.current = null }
   }
 
+  const killVoice = (statusMsg) => {
+    voiceStoppedRef.current = true
+    clearVoiceTimeout()
+    if (recognitionRef.current) {
+      recognitionRef.current.onstart = null
+      recognitionRef.current.onresult = null
+      recognitionRef.current.onerror = null
+      recognitionRef.current.onend = null
+      try { recognitionRef.current.abort() } catch (_) {}
+      recognitionRef.current = null
+    }
+    setIsListening(false)
+    if (statusMsg !== undefined) setVoiceStatus(statusMsg)
+  }
+
   // 페이지 떠날 때 TTS + 음성 중단
   useEffect(() => {
-    return () => { window.speechSynthesis?.cancel(); clearVoiceTimeout(); recognitionRef.current?.stop() }
+    return () => { window.speechSynthesis?.cancel(); killVoice(undefined) }
   }, [])
 
   // 내 말벗 목록 로드
@@ -218,10 +234,7 @@ export default function DiaryWritePage() {
     api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
 
-  const stopVoice = () => {
-    clearVoiceTimeout()
-    recognitionRef.current?.stop()
-  }
+  const stopVoice = () => { killVoice('⏹ 중지됐어요. 버튼을 다시 누르세요.') }
 
   const startVoice = (target = 'content') => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -229,34 +242,28 @@ export default function DiaryWritePage() {
       setVoiceStatus('크롬 브라우저를 사용해주세요.')
       return
     }
-    // 기존 인식 중이면 이벤트 없이 중단
-    if (recognitionRef.current) {
-      recognitionRef.current.onend = null
-      recognitionRef.current.stop()
-    }
-    clearVoiceTimeout()
+    killVoice('')  // 기존 인식 완전 종료
+    voiceStoppedRef.current = false
     setVoiceTarget(target)
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
     recognition.continuous = false
     recognition.interimResults = true
-
-    const startTimeout = () => {
-      clearVoiceTimeout()
-      voiceTimeoutRef.current = setTimeout(() => {
-        recognition.stop()
-        setIsListening(false)
-        setVoiceStatus('⏱ 7초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-      }, 7000)
-    }
+    recognitionRef.current = recognition
 
     recognition.onstart = () => {
+      if (voiceStoppedRef.current) return
       setIsListening(true)
       setVoiceStatus('듣고 있어요... 🎤')
-      startTimeout()
+      // 10초 타이머
+      clearVoiceTimeout()
+      voiceTimeoutRef.current = setTimeout(() => {
+        killVoice('⏱ 10초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+      }, 10000)
     }
     recognition.onresult = (event) => {
+      if (voiceStoppedRef.current) return
       let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
         if (event.results[i].isFinal) finalText += event.results[i][0].transcript
@@ -277,20 +284,17 @@ export default function DiaryWritePage() {
       if (interim) setVoiceStatus(`인식 중: ${interim}`)
     }
     recognition.onerror = (e) => {
-      clearVoiceTimeout()
-      setIsListening(false)
+      if (voiceStoppedRef.current) return
       if (e.error === 'no-speech') {
-        setVoiceStatus('⏱ 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+        killVoice('⏱ 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
       } else {
-        setVoiceStatus('다시 시도해주세요.')
+        killVoice('다시 시도해주세요.')
       }
     }
     recognition.onend = () => {
-      clearVoiceTimeout()
-      setIsListening(false)
-      setVoiceStatus((prev) => prev.startsWith('인식 중') ? '✅ 음성 입력 완료. 더 쓰려면 버튼을 누르세요.' : prev)
+      if (voiceStoppedRef.current) return
+      killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.')
     }
-    recognitionRef.current = recognition
     recognition.start()
   }
 
