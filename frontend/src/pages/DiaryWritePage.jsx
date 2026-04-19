@@ -204,7 +204,7 @@ export default function DiaryWritePage() {
   const voiceTimeoutRef = useRef(null)
   const voiceStoppedRef = useRef(false)
   const lastResultIdxRef = useRef(0)
-  const { enabled, speaking, speak, toggle } = useTTS()
+  const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
     if (voiceTimeoutRef.current) { clearTimeout(voiceTimeoutRef.current); voiceTimeoutRef.current = null }
@@ -258,11 +258,11 @@ export default function DiaryWritePage() {
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
-    recognition.continuous = false  // 한 문장씩 처리 — 중복 방지
+    recognition.continuous = true   // 단일 세션 — 재시작/경고음 없음
     recognition.interimResults = true
     recognitionRef.current = recognition
 
-    // 타이머는 딱 한 번만 시작 — onstart 재시작으로 리셋 안 됨
+    // 타이머 딱 한 번, 절대 리셋 안 함
     clearVoiceTimeout()
     voiceTimeoutRef.current = setTimeout(() => {
       killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
@@ -276,16 +276,15 @@ export default function DiaryWritePage() {
     recognition.onresult = (event) => {
       if (voiceStoppedRef.current) return
       let finalText = '', interim = ''
-      for (let i = 0; i < event.results.length; i++) {
-        if (event.results[i].isFinal) finalText += event.results[i][0].transcript
-        else interim += event.results[i][0].transcript
+      for (let i = lastResultIdxRef.current; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalText += event.results[i][0].transcript
+          lastResultIdxRef.current = i + 1
+        } else {
+          interim += event.results[i][0].transcript
+        }
       }
       if (finalText) {
-        // 완성된 문장이 들어왔을 때만 타이머 20초 리셋
-        clearVoiceTimeout()
-        voiceTimeoutRef.current = setTimeout(() => {
-          killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-        }, 20000)
         if (target === 'title') {
           setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
         } else {
@@ -300,12 +299,12 @@ export default function DiaryWritePage() {
     }
     recognition.onerror = (e) => {
       if (voiceStoppedRef.current) return
-      if (e.error === 'no-speech') return  // onend에서 재시작 처리
+      if (e.error === 'no-speech') return  // continuous=true라 타이머가 처리
       killVoice('다시 시도해주세요.')
     }
     recognition.onend = () => {
       if (voiceStoppedRef.current) return
-      // 타이머가 살아있는 동안 계속 재시작 (20초 대기)
+      // Android가 강제 종료한 경우만 재시작 (lastResultIdxRef 유지)
       try { recognition.start() } catch (_) { killVoice('') }
     }
     try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
@@ -385,7 +384,11 @@ export default function DiaryWritePage() {
             {feedbackLoading ? (
               <p className="text-gray-500 font-bold text-xl text-center py-4">말벗이 생각 중이에요... 🌿</p>
             ) : aiFeedback ? (
-              <p className="text-gray-300 font-bold text-xl leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{aiFeedback}</p>
+              <p
+                className="text-gray-300 font-bold text-xl leading-relaxed"
+                style={{paddingLeft: '5px', paddingRight: '5px'}}
+                onClick={() => speaking && stop()}
+              >{aiFeedback}</p>
             ) : (
               <p className="text-gray-600 font-bold text-xl text-center py-4">피드백을 가져오지 못했어요</p>
             )}

@@ -53,7 +53,7 @@ export default function DiaryDetailPage() {
   const [diary, setDiary] = useState(null)
   const [loading, setLoading] = useState(true)
   const [feedbackLoading, setFeedbackLoading] = useState(false)
-  const { enabled, speaking, speak, toggle } = useTTS()
+  const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   useEffect(() => {
     api.get(`/diaries/${id}`)
@@ -140,7 +140,11 @@ export default function DiaryDetailPage() {
         <div className="bg-gray-900 border border-amber-400 border-opacity-30 rounded-md p-4">
           <p className="text-amber-400 font-black text-2xl mb-3">🌿 말벗의 이야기</p>
           {diary.ai_feedback ? (
-            <p className="text-gray-300 font-bold text-2xl leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{diary.ai_feedback}</p>
+            <p
+              className="text-gray-300 font-bold text-2xl leading-relaxed"
+              style={{paddingLeft: '5px', paddingRight: '5px'}}
+              onClick={() => speaking && stop()}
+            >{diary.ai_feedback}</p>
           ) : (
             <div className="text-center py-2">
               <p className="text-gray-600 font-bold text-2xl mb-4">아직 말벗의 이야기가 없어요</p>
