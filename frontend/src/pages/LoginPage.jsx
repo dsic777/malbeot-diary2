@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { api } from '../api/client'
 
@@ -7,6 +7,25 @@ export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [autoLogging, setAutoLogging] = useState(false)
+
+  // 저장된 자격증명으로 자동 로그인
+  useEffect(() => {
+    const savedUser = localStorage.getItem('saved_username')
+    const savedPw = localStorage.getItem('saved_pw')
+    if (savedUser && savedPw) {
+      setAutoLogging(true)
+      api.post('/auth/login', { username: savedUser, password: savedPw })
+        .then((data) => {
+          localStorage.setItem('access_token', data.access_token)
+          navigate('/')
+        })
+        .catch(() => {
+          setAutoLogging(false)
+          setForm({ username: savedUser, password: '' })
+        })
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,12 +35,21 @@ export default function LoginPage() {
       const data = await api.post('/auth/login', form)
       localStorage.setItem('access_token', data.access_token)
       localStorage.setItem('saved_pw', form.password)
+      localStorage.setItem('saved_username', form.username)
       navigate('/')
     } catch (err) {
       setError(err.message)
     } finally {
       setLoading(false)
     }
+  }
+
+  if (autoLogging) {
+    return (
+      <div className="flex-1 bg-black flex items-center justify-center">
+        <p className="text-gray-400 font-bold text-xl">🌿 자동 로그인 중...</p>
+      </div>
+    )
   }
 
   return (

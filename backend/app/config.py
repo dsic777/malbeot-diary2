@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     # 앱 기본
     APP_ENV: str = "development"
     SECRET_KEY: str = "change-me-before-deploy"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 43200  # 30일
 
     # 데이터베이스
     DATABASE_URL: str = "sqlite+aiosqlite:///./malbeot2.db"  # 개발용 SQLite
