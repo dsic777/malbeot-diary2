@@ -234,6 +234,14 @@ export default function DiaryWritePage() {
     api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
 
+  // 신규 작성 진입 시 자동 음성 시작
+  useEffect(() => {
+    if (!isEdit) {
+      const t = setTimeout(() => startVoice('content'), 500)
+      return () => clearTimeout(t)
+    }
+  }, [])
+
   const stopVoice = () => { killVoice('⏹ 중지됐어요. 버튼을 다시 누르세요.') }
 
   const startVoice = (target = 'content') => {
@@ -299,7 +307,7 @@ export default function DiaryWritePage() {
       if (voiceStoppedRef.current) return
       killVoice('✅ 입력 완료. 더 쓰려면 버튼을 누르세요.')
     }
-    recognition.start()
+    try { recognition.start() } catch (_) { setVoiceStatus('버튼을 눌러 말로 쓰기를 시작하세요.') }
   }
 
   const handleSubmit = async (e) => {
