@@ -15,6 +15,7 @@ export default function LoginPage() {
     try {
       const data = await api.post('/auth/login', form)
       localStorage.setItem('access_token', data.access_token)
+      localStorage.setItem('saved_pw', form.password)
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -48,7 +49,7 @@ export default function LoginPage() {
             <input
               type="text"
               value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase() })}
               placeholder="아이디를 입력하세요"
               autoComplete="off"
               className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '54px', paddingLeft: '10px'}}
@@ -62,7 +63,11 @@ export default function LoginPage() {
             <input
               type="password"
               value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              onChange={(e) => {
+                const val = e.target.value
+                const savedPw = localStorage.getItem('saved_pw')
+                setForm({ ...form, password: (val === 'ps' && savedPw) ? savedPw : val })
+              }}
               placeholder="비밀번호를 입력하세요"
               autoComplete="new-password"
               className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{height: '54px', paddingLeft: '10px'}}
@@ -79,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-black rounded-xl disabled:opacity-40 transition" style={{height: '58px', backgroundColor: 'rgb(74, 222, 128)', color: 'rgb(0, 30, 80)', fontSize: '28px'}}
+              className="w-full bg-slate-400 hover:bg-slate-300 font-black rounded-xl disabled:opacity-40 transition" style={{height: '52px', color: 'rgb(0, 30, 80)', fontSize: '28px'}}
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
