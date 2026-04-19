@@ -203,6 +203,8 @@ export default function DiaryWritePage() {
   const recognitionRef = useRef(null)
   const voiceTimeoutRef = useRef(null)
   const keepListeningRef = useRef(false)
+  const silentRestartRef = useRef(0)  // 무음 재시작 횟수
+  const MAX_SILENT = 3               // 최대 허용 횟수
   const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
@@ -258,7 +260,7 @@ export default function DiaryWritePage() {
 
     setVoiceTarget(target)
     keepListeningRef.current = true
-    startTimer()  // 버튼 누른 시점부터 20초
+    silentRestartRef.current = 0
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
@@ -280,6 +282,7 @@ export default function DiaryWritePage() {
         setVoiceStatus(`인식 중: ${interim}`)
       }
       if (finalText) {
+        silentRestartRef.current = 0  // 실제 발화 확인 → 무음 카운터 리셋
         const text = finalText.trim()
         if (target === 'title') {
           setForm((prev) => ({
@@ -303,14 +306,21 @@ export default function DiaryWritePage() {
       setVoiceStatus('다시 시도해주세요.')
     }
     recognition.onend = () => {
-      if (keepListeningRef.current) {
+      if (!keepListeningRef.current) { setIsListening(false); return }
+      silentRestartRef.current += 1
+      if (silentRestartRef.current > MAX_SILENT) {
+        // 무음 재시작 3회 초과 → 자동 종료
+        keepListeningRef.current = false
+        clearVoiceTimeout()
+        recognitionRef.current = null
+        setIsListening(false)
+        setVoiceStatus('⏱ 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+      } else {
         try { recognition.start() } catch (_) {
           keepListeningRef.current = false
           clearVoiceTimeout()
           setIsListening(false)
         }
-      } else {
-        setIsListening(false)
       }
     }
     recognition.start()
