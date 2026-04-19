@@ -279,7 +279,7 @@ export default function DiaryWritePage() {
         killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
       }, 20000)
       let finalText = '', interim = ''
-      for (let i = 0; i < event.results.length; i++) {
+      for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) finalText += event.results[i][0].transcript
         else interim += event.results[i][0].transcript
       }
