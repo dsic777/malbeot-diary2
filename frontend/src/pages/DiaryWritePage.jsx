@@ -203,6 +203,7 @@ export default function DiaryWritePage() {
   const recognitionRef = useRef(null)
   const voiceTimeoutRef = useRef(null)
   const voiceStoppedRef = useRef(false)
+  const lastResultIdxRef = useRef(0)
   const { enabled, speaking, speak, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
@@ -252,6 +253,7 @@ export default function DiaryWritePage() {
     }
     killVoice('')  // 기존 인식 완전 종료
     voiceStoppedRef.current = false
+    lastResultIdxRef.current = 0
     setVoiceTarget(target)
 
     const recognition = new SpeechRecognition()
@@ -279,9 +281,13 @@ export default function DiaryWritePage() {
         killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
       }, 20000)
       let finalText = '', interim = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        if (event.results[i].isFinal) finalText += event.results[i][0].transcript
-        else interim += event.results[i][0].transcript
+      for (let i = lastResultIdxRef.current; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalText += event.results[i][0].transcript
+          lastResultIdxRef.current = i + 1  // 처리 완료된 결과는 다시 읽지 않음
+        } else {
+          interim += event.results[i][0].transcript
+        }
       }
       if (finalText) {
         if (target === 'title') {
