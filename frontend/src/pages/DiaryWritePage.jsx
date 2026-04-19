@@ -237,7 +237,7 @@ export default function DiaryWritePage() {
   // 신규 작성 진입 시 자동 음성 시작
   useEffect(() => {
     if (!isEdit) {
-      const t = setTimeout(() => startVoice('content'), 500)
+      const t = setTimeout(() => startVoice('title'), 500)
       return () => clearTimeout(t)
     }
   }, [])
