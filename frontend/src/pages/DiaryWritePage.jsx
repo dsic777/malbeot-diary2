@@ -201,12 +201,16 @@ export default function DiaryWritePage() {
   const [aiFeedback, setAiFeedback] = useState('')
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
-  const keepListeningRef = useRef(false)
+  const voiceTimeoutRef = useRef(null)
   const { enabled, speaking, speak, toggle } = useTTS()
 
-  // 페이지 떠날 때 TTS 중단
+  const clearVoiceTimeout = () => {
+    if (voiceTimeoutRef.current) { clearTimeout(voiceTimeoutRef.current); voiceTimeoutRef.current = null }
+  }
+
+  // 페이지 떠날 때 TTS + 음성 중단
   useEffect(() => {
-    return () => { window.speechSynthesis?.cancel() }
+    return () => { window.speechSynthesis?.cancel(); clearVoiceTimeout(); recognitionRef.current?.stop() }
   }, [])
 
   // 내 말벗 목록 로드
@@ -214,21 +218,44 @@ export default function DiaryWritePage() {
     api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
 
+  const stopVoice = () => {
+    clearVoiceTimeout()
+    recognitionRef.current?.stop()
+  }
+
   const startVoice = (target = 'content') => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
       setVoiceStatus('크롬 브라우저를 사용해주세요.')
       return
     }
+    // 기존 인식 중이면 이벤트 없이 중단
+    if (recognitionRef.current) {
+      recognitionRef.current.onend = null
+      recognitionRef.current.stop()
+    }
+    clearVoiceTimeout()
     setVoiceTarget(target)
-    keepListeningRef.current = true
 
     const recognition = new SpeechRecognition()
     recognition.lang = 'ko-KR'
-    recognition.continuous = false   // Android 중복 방지: 한 발화씩 처리
+    recognition.continuous = false
     recognition.interimResults = true
 
-    recognition.onstart = () => { setIsListening(true); setVoiceStatus('듣고 있어요... 🎤') }
+    const startTimeout = () => {
+      clearVoiceTimeout()
+      voiceTimeoutRef.current = setTimeout(() => {
+        recognition.stop()
+        setIsListening(false)
+        setVoiceStatus('⏱ 7초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+      }, 7000)
+    }
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      setVoiceStatus('듣고 있어요... 🎤')
+      startTimeout()
+    }
     recognition.onresult = (event) => {
       let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
@@ -236,6 +263,7 @@ export default function DiaryWritePage() {
         else interim += event.results[i][0].transcript
       }
       if (finalText) {
+        clearVoiceTimeout()
         if (target === 'title') {
           setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
         } else {
@@ -249,26 +277,21 @@ export default function DiaryWritePage() {
       if (interim) setVoiceStatus(`인식 중: ${interim}`)
     }
     recognition.onerror = (e) => {
-      if (e.error === 'no-speech') return  // 무음은 무시하고 재시작
-      keepListeningRef.current = false
+      clearVoiceTimeout()
       setIsListening(false)
-      setVoiceStatus('다시 시도해주세요.')
+      if (e.error === 'no-speech') {
+        setVoiceStatus('⏱ 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+      } else {
+        setVoiceStatus('다시 시도해주세요.')
+      }
     }
     recognition.onend = () => {
-      if (keepListeningRef.current) {
-        try { recognition.start() } catch (_) {}  // 자동 재시작
-      } else {
-        setIsListening(false)
-        setVoiceStatus('음성 입력 완료')
-      }
+      clearVoiceTimeout()
+      setIsListening(false)
+      setVoiceStatus((prev) => prev.startsWith('인식 중') ? '✅ 음성 입력 완료. 더 쓰려면 버튼을 누르세요.' : prev)
     }
     recognitionRef.current = recognition
     recognition.start()
-  }
-
-  const stopVoice = () => {
-    keepListeningRef.current = false
-    recognitionRef.current?.stop()
   }
 
   const handleSubmit = async (e) => {
