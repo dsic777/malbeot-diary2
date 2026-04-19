@@ -79,7 +79,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-black rounded-md disabled:opacity-40 transition" style={{height: '58px', backgroundColor: 'rgb(74, 222, 128)', color: 'rgb(255, 255, 255)', fontSize: '28px'}}
+              className="w-full font-black rounded-xl disabled:opacity-40 transition" style={{height: '58px', backgroundColor: 'rgb(74, 222, 128)', color: 'rgb(0, 30, 80)', fontSize: '28px'}}
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
