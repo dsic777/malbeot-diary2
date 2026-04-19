@@ -84,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-400 hover:bg-slate-300 font-black rounded-xl disabled:opacity-40 transition" style={{height: '52px', color: 'rgb(0, 30, 80)', fontSize: '28px'}}
+              className="w-full bg-slate-400 hover:bg-slate-300 font-black rounded-md disabled:opacity-40 transition" style={{height: '50px', color: 'rgb(0, 30, 80)', fontSize: '24px'}}
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>

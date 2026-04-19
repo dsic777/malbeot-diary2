@@ -167,7 +167,7 @@ export default function PersonaPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="bg-amber-400 text-black font-black rounded-md py-2 text-sm disabled:opacity-40"
+                  className="bg-amber-400 text-black font-black rounded-md disabled:opacity-40" style={{height:'50px', fontSize:'24px'}}
                 >
                   {saving ? '저장 중...' : '말벗 추가'}
                 </button>

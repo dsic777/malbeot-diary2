@@ -147,7 +147,7 @@ export default function DiaryDetailPage() {
               <button
                 onClick={handleGetFeedback}
                 disabled={feedbackLoading}
-                className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md px-6 py-3 text-base disabled:opacity-40 transition"
+                className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md px-6 disabled:opacity-40 transition" style={{height:'50px', fontSize:'24px'}}
               >
                 {feedbackLoading ? '생각 중...' : '💬 말벗에게 물어보기'}
               </button>

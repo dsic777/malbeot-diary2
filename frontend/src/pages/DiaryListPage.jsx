@@ -257,8 +257,8 @@ export default function DiaryListPage() {
       <header className="bg-black border-b border-gray-800 px-5 flex items-center justify-between sticky top-0 z-10" style={{paddingTop: '18px', paddingBottom: '18px'}}>
         <h1 className="text-xl font-black text-white" style={{marginLeft: '10px'}}>🌿 말벗이 내 손 안에</h1>
         <div className="flex items-center gap-3" style={{marginRight: '20px'}}>
-          <button onClick={() => navigate('/personas')} className="text-gray-400 font-bold text-base">🎭 말벗</button>
-          <button onClick={handleLogout} className="text-gray-500 font-bold text-base">로그아웃</button>
+          <button onClick={() => navigate('/personas')} className="text-gray-400 font-bold" style={{fontSize:'20px'}}>🎭 말벗</button>
+          <button onClick={handleLogout} className="text-gray-500 font-bold" style={{fontSize:'20px'}}>로그아웃</button>
         </div>
       </header>
 
@@ -266,13 +266,15 @@ export default function DiaryListPage() {
       <div className="bg-black border-b border-gray-800 flex" style={{paddingLeft: '15px', paddingRight: '15px'}}>
         <button
           onClick={() => setTab('list')}
-          className={`flex-1 py-3 text-base font-black transition border-b-2 ${tab === 'list' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          className={`flex-1 font-black transition border-b-2 ${tab === 'list' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          style={{height:'50px', fontSize:'24px'}}
         >
           📋 목록
         </button>
         <button
           onClick={() => setTab('calendar')}
-          className={`flex-1 py-3 text-base font-black transition border-b-2 ${tab === 'calendar' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          className={`flex-1 font-black transition border-b-2 ${tab === 'calendar' ? 'text-white border-blue-500' : 'text-gray-600 border-transparent'}`}
+          style={{height:'50px', fontSize:'24px'}}
         >
           📅 캘린더
         </button>
@@ -300,8 +302,8 @@ export default function DiaryListPage() {
             <button
               onClick={handleSearch}
               disabled={searching}
-              className="text-white font-black text-base rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
-              style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', backgroundColor: 'rgba(52, 145, 217, 0.99)' }}
+              className="text-white font-black rounded-md disabled:opacity-40 whitespace-nowrap flex-shrink-0"
+              style={{ height: '50px', paddingLeft: '16px', paddingRight: '16px', fontSize: '24px', backgroundColor: 'rgba(52, 145, 217, 0.99)' }}
             >
               {searching ? '...' : '검 색'}
             </button>
@@ -347,7 +349,7 @@ export default function DiaryListPage() {
       <div className="border-t border-gray-800" style={{paddingTop: '16px', paddingBottom: '20px', paddingLeft: '10px', paddingRight: '10px'}}>
         <button
           onClick={() => navigate('/write')}
-          className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md text-xl transition" style={{height: '50px'}}
+          className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md transition" style={{height: '50px', fontSize: '24px'}}
         >
           🎤 오늘 이야기 남기기
         </button>

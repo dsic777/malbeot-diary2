@@ -354,13 +354,13 @@ export default function DiaryWritePage() {
           {/* 하단 버튼 */}
           <button
             onClick={() => navigate(`/diary/${savedDiary.id}`)}
-            className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg transition"
+            className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md transition" style={{height:'50px', fontSize:'24px'}}
           >
             📖 기록 보러 가기
           </button>
           <button
             onClick={() => navigate('/')}
-            className="bg-gray-800 hover:bg-gray-700 text-gray-300 font-black rounded-md py-4 text-lg transition"
+            className="bg-gray-800 hover:bg-gray-700 text-gray-300 font-black rounded-md transition" style={{height:'50px', fontSize:'24px'}}
           >
             📋 목록으로 돌아가기
           </button>
@@ -529,7 +529,7 @@ export default function DiaryWritePage() {
         {error && <p className="text-red-400 font-bold text-sm">{error}</p>}
 
         <button type="submit" disabled={loading}
-          className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg disabled:opacity-40 transition"
+          className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md disabled:opacity-40 transition" style={{height:'50px', fontSize:'24px'}}
         >
           {loading ? (isEdit ? '수정 중...' : '저장 중...') : isEdit ? '✅ 수정 완료' : '💾 저장'}
         </button>
