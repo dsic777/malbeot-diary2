@@ -328,26 +328,26 @@ export default function DiaryWritePage() {
               hasFeedback={!!aiFeedback}
             />
           </div>
-          <h1 className="text-lg font-black text-white">이야기 남기기</h1>
+          <h1 className="text-xl font-black text-white">이야기 남기기</h1>
           <div style={{width: '40px'}} />
         </header>
 
         <div className="flex-1 flex flex-col gap-4 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '18px', paddingBottom: '20px'}}>
           {/* 저장 완료 메시지 */}
           <div className="bg-gray-900 border border-gray-800 rounded-md p-4 text-center">
-            <p className="text-green-400 font-black text-base">{isEdit ? '✅ 이야기가 수정되었어요' : '✅ 이야기가 저장되었어요'}</p>
-            <p className="text-gray-600 font-bold text-sm mt-1">{savedDiary.diary_date}</p>
+            <p className="text-green-400 font-black text-lg">{isEdit ? '✅ 이야기가 수정되었어요' : '✅ 이야기가 저장되었어요'}</p>
+            <p className="text-gray-600 font-bold text-lg mt-1">{savedDiary.diary_date}</p>
           </div>
 
           {/* 말벗의 이야기 */}
           <div className="bg-gray-900 border border-amber-400 border-opacity-30 rounded-md p-4 flex-1">
-            <p className="text-amber-400 font-black text-sm mb-3">🌿 말벗의 이야기</p>
+            <p className="text-amber-400 font-black text-lg mb-3">🌿 말벗의 이야기</p>
             {feedbackLoading ? (
-              <p className="text-gray-500 font-bold text-sm text-center py-4">말벗이 생각 중이에요... 🌿</p>
+              <p className="text-gray-500 font-bold text-lg text-center py-4">말벗이 생각 중이에요... 🌿</p>
             ) : aiFeedback ? (
-              <p className="text-gray-300 font-bold text-base leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{aiFeedback}</p>
+              <p className="text-gray-300 font-bold text-lg leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{aiFeedback}</p>
             ) : (
-              <p className="text-gray-600 font-bold text-sm text-center py-4">피드백을 가져오지 못했어요</p>
+              <p className="text-gray-600 font-bold text-lg text-center py-4">피드백을 가져오지 못했어요</p>
             )}
           </div>
 
@@ -384,14 +384,14 @@ export default function DiaryWritePage() {
             hasFeedback={false}
           />
         </div>
-        <h1 className="text-lg font-black text-white">{isEdit ? '이야기 수정하기' : '이야기 남기기'}</h1>
+        <h1 className="text-xl font-black text-white">{isEdit ? '이야기 수정하기' : '이야기 남기기'}</h1>
         <div style={{width: '40px'}} />
       </header>
 
       <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-3 overflow-y-auto" style={{paddingLeft: '15px', paddingRight: '15px', paddingTop: '12px', paddingBottom: '12px'}}>
         {/* 날짜 */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500 font-bold text-xs">날짜</label>
+          <label className="text-gray-500 font-bold text-lg">날짜</label>
           <DatePicker
             value={form.diary_date}
             onChange={(date) => setForm({ ...form, diary_date: date })}
@@ -401,10 +401,10 @@ export default function DiaryWritePage() {
         {/* 제목 */}
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between">
-            <label className="text-gray-500 font-bold text-xs">제목 (선택)</label>
+            <label className="text-gray-500 font-bold text-lg">제목 (선택)</label>
             <button type="button"
               onClick={() => isListening && voiceTarget === 'title' ? stopVoice() : startVoice('title')}
-              className={`px-2 py-0.5 rounded-md text-xs font-black transition
+              className={`px-2 py-0.5 rounded-md text-base font-black transition
                 ${isListening && voiceTarget === 'title' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
             >
               🎤 {isListening && voiceTarget === 'title' ? '중지' : '말로 쓰기'}
@@ -415,14 +415,14 @@ export default function DiaryWritePage() {
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
             placeholder="제목을 입력하세요"
-            className="bg-gray-900 border border-gray-800 rounded-md py-2 text-sm text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
+            className="bg-gray-900 border border-gray-800 rounded-md py-2 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
             style={{paddingLeft: '10px'}}
           />
         </div>
 
         {/* 감정 */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500 font-bold text-xs">오늘의 감정</label>
+          <label className="text-gray-500 font-bold text-lg">오늘의 감정</label>
           <div className="flex flex-wrap gap-1.5">
             {EMOTIONS.map((em) => {
               const selected = form.emotion === em
@@ -434,7 +434,7 @@ export default function DiaryWritePage() {
                     borderColor: EMOTION_COLOR[em],
                     color: '#000',
                   } : {}}
-                  className={`pl-2 pr-3 py-1 rounded-full text-xs font-bold border transition
+                  className={`pl-2 pr-3 py-1 rounded-full text-base font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {EMOTION_EMOJI[em]} {em}
@@ -446,7 +446,7 @@ export default function DiaryWritePage() {
 
         {/* 날씨 */}
         <div className="flex flex-col gap-1">
-          <label className="text-gray-500 font-bold text-xs">오늘의 날씨</label>
+          <label className="text-gray-500 font-bold text-lg">오늘의 날씨</label>
           <div className="flex flex-wrap gap-1.5">
             {WEATHERS.map((w) => {
               const selected = form.weather === w
@@ -458,7 +458,7 @@ export default function DiaryWritePage() {
                     borderColor: WEATHER_COLOR[w],
                     color: '#000',
                   } : {}}
-                  className={`pl-2 pr-3 py-1 rounded-full text-xs font-bold border transition
+                  className={`pl-2 pr-3 py-1 rounded-full text-base font-bold border transition
                     ${selected ? '' : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'}`}
                 >
                   {WEATHER_EMOJI[w]} {w}
@@ -471,9 +471,9 @@ export default function DiaryWritePage() {
         {/* 내용 + 음성 */}
         <div className="flex flex-col gap-1 flex-1">
           <div className="flex items-center justify-between">
-            <label className="text-gray-500 font-bold text-xs">오늘의 이야기 <span className="text-red-500">*</span></label>
+            <label className="text-gray-500 font-bold text-lg">오늘의 이야기 <span className="text-red-500">*</span></label>
             <button type="button" onClick={() => isListening && voiceTarget === 'content' ? stopVoice() : startVoice('content')}
-              className={`px-2 py-0.5 rounded-md text-xs font-black transition
+              className={`px-2 py-0.5 rounded-md text-base font-black transition
                 ${isListening && voiceTarget === 'content' ? 'bg-red-500 text-white animate-pulse' : 'bg-gray-800 text-amber-400 border border-amber-400'}`}
             >
               🎤 {isListening && voiceTarget === 'content' ? '중지' : '말로 쓰기'}
@@ -481,7 +481,7 @@ export default function DiaryWritePage() {
           </div>
 
           {voiceStatus && (
-            <p className={`text-xs font-bold px-2 py-1 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
+            <p className={`text-base font-bold px-2 py-1 rounded-md ${isListening ? 'bg-gray-900 text-amber-400' : 'bg-gray-900 text-gray-500'}`}>
               {voiceStatus}
             </p>
           )}
@@ -490,7 +490,7 @@ export default function DiaryWritePage() {
             value={form.content}
             onChange={(e) => setForm({ ...form, content: e.target.value })}
             placeholder="오늘 있었던 일을 자유롭게 적어보세요..."
-            className="bg-gray-900 border border-gray-800 rounded-md py-3 text-base text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400 resize-none"
+            className="bg-gray-900 border border-gray-800 rounded-md py-3 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400 resize-none"
             style={{paddingLeft: '10px', paddingRight: '10px', flex: 1, minHeight: '120px'}}
           />
         </div>
@@ -499,8 +499,8 @@ export default function DiaryWritePage() {
         {personas.length > 0 && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-gray-500 font-bold text-sm">말벗 선택 (선택)</label>
-              <button type="button" onClick={() => navigate('/personas')} className="text-amber-400 font-bold text-xs">+ 말벗 관리</button>
+              <label className="text-gray-500 font-bold text-lg">말벗 선택 (선택)</label>
+              <button type="button" onClick={() => navigate('/personas')} className="text-amber-400 font-bold text-base">+ 말벗 관리</button>
             </div>
             <div className="flex gap-2 flex-wrap">
               <button
@@ -516,7 +516,7 @@ export default function DiaryWritePage() {
                   key={p.id}
                   type="button"
                   onClick={() => setForm({ ...form, persona_id: form.persona_id === p.id ? null : p.id })}
-                  className={`px-3 py-1 rounded-md text-sm font-bold border transition
+                  className={`px-3 py-1 rounded-md text-lg font-bold border transition
                     ${form.persona_id === p.id ? 'bg-amber-400 border-amber-400 text-black' : 'bg-gray-900 border-gray-700 text-gray-400'}`}
                 >
                   {PERSONA_ICON[p.preset_type] || '✏️'} {p.name}
@@ -526,7 +526,7 @@ export default function DiaryWritePage() {
           </div>
         )}
 
-        {error && <p className="text-red-400 font-bold text-sm">{error}</p>}
+        {error && <p className="text-red-400 font-bold text-lg">{error}</p>}
 
         <button type="submit" disabled={loading}
           className="bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md disabled:opacity-40 transition" style={{height:'50px', fontSize:'24px'}}

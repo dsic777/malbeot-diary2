@@ -109,17 +109,17 @@ export default function DiaryDetailPage() {
             hasFeedback={!!diary.ai_feedback}
           />
         </div>
-        <h1 className="text-lg font-black text-white">기록 보기</h1>
+        <h1 className="text-xl font-black text-white">기록 보기</h1>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/write', { state: { diary } })} className="text-blue-400 font-bold text-sm">✏️ 수정</button>
-          <button onClick={handleDelete} className="text-red-500 font-bold text-sm">🗑️ 삭제</button>
+          <button onClick={() => navigate('/write', { state: { diary } })} className="text-blue-400 font-bold text-lg">✏️ 수정</button>
+          <button onClick={handleDelete} className="text-red-500 font-bold text-lg">🗑️ 삭제</button>
         </div>
       </header>
 
       <div className="flex-1 py-4 flex flex-col gap-4" style={{paddingLeft: '15px', paddingRight: '15px'}}>
         {/* 날짜 + 감정/날씨 */}
         <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
-          <p className="text-gray-600 font-bold text-sm mb-2">{diary.diary_date}</p>
+          <p className="text-gray-600 font-bold text-lg mb-2">{diary.diary_date}</p>
           <div className="flex gap-3 text-2xl">
             {diary.emotion && <span>{EMOTION_EMOJI[diary.emotion] || diary.emotion}</span>}
             {diary.weather && <span>{WEATHER_EMOJI[diary.weather] || diary.weather}</span>}
@@ -131,19 +131,19 @@ export default function DiaryDetailPage() {
 
         {/* 일기 내용 */}
         <div className="bg-gray-900 border border-gray-800 rounded-md p-4">
-          <p className="text-gray-300 font-bold text-base leading-relaxed whitespace-pre-wrap">
+          <p className="text-gray-300 font-bold text-lg leading-relaxed whitespace-pre-wrap">
             {diary.content}
           </p>
         </div>
 
         {/* AI 피드백 */}
         <div className="bg-gray-900 border border-amber-400 border-opacity-30 rounded-md p-4">
-          <p className="text-amber-400 font-black text-sm mb-3">🌿 말벗의 이야기</p>
+          <p className="text-amber-400 font-black text-lg mb-3">🌿 말벗의 이야기</p>
           {diary.ai_feedback ? (
-            <p className="text-gray-300 font-bold text-base leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{diary.ai_feedback}</p>
+            <p className="text-gray-300 font-bold text-lg leading-relaxed" style={{paddingLeft: '5px', paddingRight: '5px'}}>{diary.ai_feedback}</p>
           ) : (
             <div className="text-center py-2">
-              <p className="text-gray-600 font-bold text-sm mb-4">아직 말벗의 이야기가 없어요</p>
+              <p className="text-gray-600 font-bold text-lg mb-4">아직 말벗의 이야기가 없어요</p>
               <button
                 onClick={handleGetFeedback}
                 disabled={feedbackLoading}

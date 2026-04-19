@@ -21,7 +21,7 @@ function DiaryCard({ diary, onClick }) {
       className="bg-gray-900 border border-gray-800 rounded-md p-4 cursor-pointer hover:border-gray-600 transition"
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-500 font-bold text-base">{diary.diary_date}</span>
+        <span className="text-gray-500 font-bold text-lg">{diary.diary_date}</span>
         <div className="flex gap-2 text-2xl">
           <span>{INPUT_ICON[diary.input_type] || '📝'}</span>
           {diary.emotion && <span>{EMOTION_EMOJI[diary.emotion]}</span>}
@@ -108,7 +108,7 @@ function CalendarView({ diaries, onDiaryClick }) {
         {WEEKDAYS.map((w, i) => (
           <div
             key={w}
-            className={`text-center text-sm font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
+            className={`text-center text-lg font-black pb-2 ${i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-400' : 'text-gray-500'}`}
           >
             {w}
           </div>
@@ -150,7 +150,7 @@ function CalendarView({ diaries, onDiaryClick }) {
               className="flex flex-col items-center pt-1.5 pb-1 cursor-pointer transition hover:opacity-75"
             >
               {/* 날짜 숫자 */}
-              <span className={`text-base font-bold leading-tight
+              <span className={`text-lg font-bold leading-tight
                 ${isSelected ? 'text-white' : isToday ? 'text-amber-400' : colIdx === 0 ? 'text-red-400' : colIdx === 6 ? 'text-blue-400' : 'text-gray-300'}`}
               >
                 {day}
@@ -292,7 +292,7 @@ export default function DiaryListPage() {
                 onChange={(e) => setKeyword(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="제목 또는 내용 검색..."
-                className="flex-1 bg-transparent text-base text-white font-bold placeholder-gray-600 focus:outline-none"
+                className="flex-1 bg-transparent text-xl text-white font-bold placeholder-gray-600 focus:outline-none"
                 style={{paddingTop: '12px', paddingBottom: '12px'}}
               />
               {keyword && (

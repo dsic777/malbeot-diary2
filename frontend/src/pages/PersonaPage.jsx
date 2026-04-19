@@ -95,7 +95,7 @@ export default function PersonaPage() {
       {/* 헤더 */}
       <header className="bg-black border-b border-gray-800 px-5 py-4 flex items-center justify-between sticky top-0 z-10">
         <button onClick={() => navigate('/')} className="text-gray-500 font-black text-xl">←</button>
-        <h1 className="text-lg font-black text-white">말벗 설정</h1>
+        <h1 className="text-xl font-black text-white">말벗 설정</h1>
         <div style={{width: '24px'}} />
       </header>
 
@@ -103,7 +103,7 @@ export default function PersonaPage() {
 
         {/* 프리셋 추가 */}
         <div>
-          <p className="text-gray-500 font-bold text-sm mb-3">프리셋 말벗 추가</p>
+          <p className="text-gray-500 font-bold text-lg mb-3">프리셋 말벗 추가</p>
           <div className="flex flex-col gap-2">
             {PRESETS.map((preset) => {
               const already = personas.some((p) => p.preset_type === preset.preset_type)
@@ -119,12 +119,12 @@ export default function PersonaPage() {
                 >
                   <span className="text-2xl">{preset.icon}</span>
                   <div className="flex-1">
-                    <p className="text-white font-black text-sm">{preset.name}</p>
-                    <p className="text-gray-500 font-bold text-xs mt-0.5">{preset.desc}</p>
+                    <p className="text-white font-black text-lg">{preset.name}</p>
+                    <p className="text-gray-500 font-bold text-base mt-0.5">{preset.desc}</p>
                   </div>
                   {already
-                    ? <span className="text-green-500 font-bold text-xs">추가됨</span>
-                    : <span className="text-amber-400 font-bold text-xs">+ 추가</span>
+                    ? <span className="text-green-500 font-bold text-base">추가됨</span>
+                    : <span className="text-amber-400 font-bold text-base">+ 추가</span>
                   }
                 </button>
               )
@@ -137,10 +137,10 @@ export default function PersonaPage() {
             >
               <span className="text-2xl">✏️</span>
               <div className="flex-1">
-                <p className="text-white font-black text-sm">직접 설정</p>
-                <p className="text-gray-500 font-bold text-xs mt-0.5">나만의 말벗 캐릭터 만들기</p>
+                <p className="text-white font-black text-lg">직접 설정</p>
+                <p className="text-gray-500 font-bold text-base mt-0.5">나만의 말벗 캐릭터 만들기</p>
               </div>
-              <span className="text-amber-400 font-bold text-xs">{showCustomForm ? '▲' : '+ 추가'}</span>
+              <span className="text-amber-400 font-bold text-base">{showCustomForm ? '▲' : '+ 추가'}</span>
             </button>
 
             {/* 직접 설정 폼 */}
@@ -151,7 +151,7 @@ export default function PersonaPage() {
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder="말벗 이름 (예: 든든한 언니)"
-                  className="bg-black border border-gray-700 rounded-md py-2 text-sm text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
+                  className="bg-black border border-gray-700 rounded-md py-2 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400"
                   style={{paddingLeft: '10px'}}
                   required
                 />
@@ -160,7 +160,7 @@ export default function PersonaPage() {
                   onChange={(e) => setCustomDesc(e.target.value)}
                   placeholder="말벗 성격 설명 (예: 유머 있고 솔직한 언니처럼 말해주세요)"
                   rows={3}
-                  className="bg-black border border-gray-700 rounded-md py-2 text-sm text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400 resize-none"
+                  className="bg-black border border-gray-700 rounded-md py-2 text-xl text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400 resize-none"
                   style={{paddingLeft: '10px'}}
                   required
                 />
@@ -178,14 +178,14 @@ export default function PersonaPage() {
 
         {/* 내 말벗 목록 */}
         <div>
-          <p className="text-gray-500 font-bold text-sm mb-3">내 말벗 목록</p>
+          <p className="text-gray-500 font-bold text-lg mb-3">내 말벗 목록</p>
           {loading ? (
-            <p className="text-gray-600 font-bold text-sm text-center py-4">불러오는 중...</p>
+            <p className="text-gray-600 font-bold text-lg text-center py-4">불러오는 중...</p>
           ) : personas.length === 0 ? (
             <div className="text-center py-8 text-gray-600">
               <div className="text-4xl mb-3">🌿</div>
-              <p className="font-bold text-sm">아직 말벗이 없어요</p>
-              <p className="font-bold text-xs mt-1">위에서 말벗을 추가해 보세요</p>
+              <p className="font-bold text-lg">아직 말벗이 없어요</p>
+              <p className="font-bold text-base mt-1">위에서 말벗을 추가해 보세요</p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
@@ -193,14 +193,14 @@ export default function PersonaPage() {
                 <div key={p.id} className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-md p-4">
                   <span className="text-2xl">{getIcon(p)}</span>
                   <div className="flex-1">
-                    <p className="text-white font-black text-sm">{p.name}</p>
+                    <p className="text-white font-black text-lg">{p.name}</p>
                     {p.custom_description && (
-                      <p className="text-gray-500 font-bold text-xs mt-0.5 line-clamp-1">{p.custom_description}</p>
+                      <p className="text-gray-500 font-bold text-base mt-0.5 line-clamp-1">{p.custom_description}</p>
                     )}
                   </div>
                   <button
                     onClick={() => handleDelete(p.id)}
-                    className="text-red-500 font-bold text-xs"
+                    className="text-red-500 font-bold text-base"
                   >
                     삭제
                   </button>
