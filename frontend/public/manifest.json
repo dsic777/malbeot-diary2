@@ -2,24 +2,24 @@
   "name": "말벗이 내 손 안에",
   "short_name": "말벗이",
   "description": "언제든 말을 걸 수 있는 내 손 안의 절친",
-  "start_url": "/",
+  "start_url": "/malbeot/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/malbeot_icon.jpg",
+      "src": "./malbeot_icon.jpg",
       "sizes": "192x192",
       "type": "image/jpeg"
     },
     {
-      "src": "/malbeot_icon.jpg",
+      "src": "./malbeot_icon.jpg",
       "sizes": "512x512",
       "type": "image/jpeg"
     },
     {
-      "src": "/malbeot_icon.jpg",
+      "src": "./malbeot_icon.jpg",
       "sizes": "any",
       "type": "image/jpeg",
       "purpose": "any maskable"
