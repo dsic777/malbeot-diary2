@@ -275,18 +275,17 @@ export default function DiaryWritePage() {
     }
     recognition.onresult = (event) => {
       if (voiceStoppedRef.current) return
-      // 마지막 음성 후 20초 침묵이면 종료
-      clearVoiceTimeout()
-      voiceTimeoutRef.current = setTimeout(() => {
-        killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-      }, 20000)
-      // continuous=false: 세션당 결과 하나 — 중복 없음
       let finalText = '', interim = ''
       for (let i = 0; i < event.results.length; i++) {
         if (event.results[i].isFinal) finalText += event.results[i][0].transcript
         else interim += event.results[i][0].transcript
       }
       if (finalText) {
+        // 완성된 문장이 들어왔을 때만 타이머 20초 리셋
+        clearVoiceTimeout()
+        voiceTimeoutRef.current = setTimeout(() => {
+          killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+        }, 20000)
         if (target === 'title') {
           setForm((prev) => ({ ...prev, title: prev.title + (prev.title ? ' ' : '') + finalText }))
         } else {
