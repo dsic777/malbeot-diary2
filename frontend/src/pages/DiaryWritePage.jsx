@@ -241,7 +241,7 @@ export default function DiaryWritePage() {
       recognitionRef.current = null
       setIsListening(false)
       setVoiceStatus('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-    }, 20000)
+    }, 30000)
   }
 
   const startVoice = (target = 'content') => {
@@ -277,7 +277,6 @@ export default function DiaryWritePage() {
         else interim += event.results[i][0].transcript
       }
       if (interim) {
-        startTimer()  // 말하는 중(interim)에만 타이머 리셋 — startup sound final은 리셋 안 함
         setVoiceStatus(`인식 중: ${interim}`)
       }
       if (finalText) {
