@@ -204,7 +204,8 @@ export default function DiaryWritePage() {
   const voiceTimeoutRef = useRef(null)
   const voiceStoppedRef = useRef(false)
   const sessionIdRef = useRef(0)
-  const addedTextsRef = useRef(new Set())
+  const titleAddedRef = useRef(new Set())   // 페이지 떠날 때까지 유지
+  const contentAddedRef = useRef(new Set()) // 페이지 떠날 때까지 유지
   const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
@@ -257,7 +258,7 @@ export default function DiaryWritePage() {
     voiceStoppedRef.current = false
     sessionIdRef.current += 1
     const mySession = sessionIdRef.current
-    addedTextsRef.current = new Set()
+    const addedRef = target === 'title' ? titleAddedRef : contentAddedRef
     setVoiceTarget(target)
 
     // 타이머 딱 한 번 — 절대 리셋 안 함
@@ -286,9 +287,9 @@ export default function DiaryWritePage() {
         let finalText = '', interim = ''
         for (let i = 0; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
-            const text = event.results[i][0].transcript.trim()
-            if (text && !addedTextsRef.current.has(text)) {
-              addedTextsRef.current.add(text)
+            const text = event.results[i][0].transcript.trim().replace(/\s+/g, ' ')
+            if (text && !addedRef.current.has(text)) {
+              addedRef.current.add(text)
               finalText += (finalText ? ' ' : '') + text
             }
           } else {
