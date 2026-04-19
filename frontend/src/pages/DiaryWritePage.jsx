@@ -202,41 +202,118 @@ export default function DiaryWritePage() {
   const [personas, setPersonas] = useState([])
   const recognitionRef = useRef(null)
   const voiceTimeoutRef = useRef(null)
-  const voiceStoppedRef = useRef(false)
-  const sessionIdRef = useRef(0)
-  const titleAddedRef = useRef(new Set())   // 페이지 떠날 때까지 유지
-  const contentAddedRef = useRef(new Set()) // 페이지 떠날 때까지 유지
+  const keepListeningRef = useRef(false)
   const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
     if (voiceTimeoutRef.current) { clearTimeout(voiceTimeoutRef.current); voiceTimeoutRef.current = null }
   }
 
-  const killVoice = (statusMsg) => {
-    sessionIdRef.current += 1  // 모든 콜백 무효화
-    voiceStoppedRef.current = true
-    clearVoiceTimeout()
-    if (recognitionRef.current) {
-      recognitionRef.current.onstart = null
-      recognitionRef.current.onresult = null
-      recognitionRef.current.onerror = null
-      recognitionRef.current.onend = null
-      try { recognitionRef.current.abort() } catch (_) {}
-      recognitionRef.current = null
-    }
-    setIsListening(false)
-    if (statusMsg !== undefined) setVoiceStatus(statusMsg)
-  }
-
   // 페이지 떠날 때 TTS + 음성 중단
   useEffect(() => {
-    return () => { window.speechSynthesis?.cancel(); killVoice(undefined) }
+    return () => {
+      window.speechSynthesis?.cancel()
+      keepListeningRef.current = false
+      clearVoiceTimeout()
+      try { recognitionRef.current?.abort() } catch (_) {}
+      recognitionRef.current = null
+    }
   }, [])
 
   // 내 말벗 목록 로드
   useEffect(() => {
     api.get('/personas/').then(setPersonas).catch(() => {})
   }, [])
+
+  const stopVoice = () => {
+    keepListeningRef.current = false
+    clearVoiceTimeout()
+    try { recognitionRef.current?.stop() } catch (_) {}
+    setIsListening(false)
+    setVoiceStatus('⏹ 중지됐어요. 버튼을 다시 누르세요.')
+  }
+
+  const startTimer = () => {
+    clearVoiceTimeout()
+    voiceTimeoutRef.current = setTimeout(() => {
+      keepListeningRef.current = false
+      try { recognitionRef.current?.abort() } catch (_) {}
+      recognitionRef.current = null
+      setIsListening(false)
+      setVoiceStatus('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
+    }, 20000)
+  }
+
+  const startVoice = (target = 'content') => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setVoiceStatus('크롬 브라우저를 사용해주세요.')
+      return
+    }
+    // 기존 세션 종료
+    keepListeningRef.current = false
+    clearVoiceTimeout()
+    try { recognitionRef.current?.abort() } catch (_) {}
+    recognitionRef.current = null
+
+    setVoiceTarget(target)
+    keepListeningRef.current = true
+    startTimer()  // 버튼 누른 시점부터 20초
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'ko-KR'
+    recognition.continuous = false  // 원본 방식: 한 발화씩
+    recognition.interimResults = true
+    recognitionRef.current = recognition
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      setVoiceStatus('듣고 있어요... 🎤')
+    }
+    recognition.onresult = (event) => {
+      let finalText = '', interim = ''
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) finalText += event.results[i][0].transcript
+        else interim += event.results[i][0].transcript
+      }
+      if (finalText) {
+        startTimer()  // 실제 발화 확정 시에만 타이머 리셋
+        const text = finalText.trim()
+        if (target === 'title') {
+          setForm((prev) => ({
+            ...prev,
+            title: prev.title.endsWith(text) ? prev.title : prev.title + (prev.title ? ' ' : '') + text,
+          }))
+        } else {
+          setForm((prev) => ({
+            ...prev,
+            content: prev.content.endsWith(text) ? prev.content : prev.content + (prev.content ? ' ' : '') + text,
+            input_type: 'voice',
+          }))
+        }
+      }
+      if (interim) setVoiceStatus(`인식 중: ${interim}`)
+    }
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech') return
+      keepListeningRef.current = false
+      clearVoiceTimeout()
+      setIsListening(false)
+      setVoiceStatus('다시 시도해주세요.')
+    }
+    recognition.onend = () => {
+      if (keepListeningRef.current) {
+        try { recognition.start() } catch (_) {
+          keepListeningRef.current = false
+          clearVoiceTimeout()
+          setIsListening(false)
+        }
+      } else {
+        setIsListening(false)
+      }
+    }
+    recognition.start()
+  }
 
   // 신규 작성 진입 시 자동 음성 시작
   useEffect(() => {
@@ -245,96 +322,6 @@ export default function DiaryWritePage() {
       return () => clearTimeout(t)
     }
   }, [])
-
-  const stopVoice = () => { killVoice('⏹ 중지됐어요. 버튼을 다시 누르세요.') }
-
-  const startVoice = (target = 'content') => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      setVoiceStatus('크롬 브라우저를 사용해주세요.')
-      return
-    }
-    killVoice('')  // 기존 세션 종료 + sessionId 증가
-    voiceStoppedRef.current = false
-    sessionIdRef.current += 1
-    const mySession = sessionIdRef.current
-    const addedRef = target === 'title' ? titleAddedRef : contentAddedRef
-    setVoiceTarget(target)
-
-    // 타이머 딱 한 번 — 절대 리셋 안 함
-    clearVoiceTimeout()
-    voiceTimeoutRef.current = setTimeout(() => {
-      if (sessionIdRef.current !== mySession) return
-      killVoice('⏱ 20초 무응답으로 종료됐어요. 버튼을 다시 누르세요.')
-    }, 20000)
-
-    const startSession = () => {
-      if (sessionIdRef.current !== mySession) return
-
-      const rec = new SpeechRecognition()
-      rec.lang = 'ko-KR'
-      rec.continuous = true
-      rec.interimResults = true
-      recognitionRef.current = rec
-
-      rec.onstart = () => {
-        if (sessionIdRef.current !== mySession) return
-        setIsListening(true)
-        setVoiceStatus('듣고 있어요... 🎤')
-      }
-      rec.onresult = (event) => {
-        if (sessionIdRef.current !== mySession) return
-        let interim = ''
-        for (let i = 0; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            // 공백·구두점 정규화
-            const text = event.results[i][0].transcript
-              .trim()
-              .replace(/\s+/g, ' ')
-              .replace(/[.。,，!！?？~]/g, '')
-              .trim()
-            if (!text) continue
-            // Set 중복 체크 (세션 내)
-            if (addedRef.current.has(text)) continue
-            addedRef.current.add(text)
-            // form 상태 기반 이중 체크 (세션 간 — Android 재전송 방어)
-            if (target === 'title') {
-              setForm((prev) => ({
-                ...prev,
-                title: prev.title.includes(text)
-                  ? prev.title
-                  : prev.title + (prev.title ? ' ' : '') + text,
-              }))
-            } else {
-              setForm((prev) => ({
-                ...prev,
-                content: prev.content.includes(text)
-                  ? prev.content
-                  : prev.content + (prev.content ? ' ' : '') + text,
-                input_type: 'voice',
-              }))
-            }
-          } else {
-            interim += event.results[i][0].transcript
-          }
-        }
-        if (interim) setVoiceStatus(`인식 중: ${interim}`)
-      }
-      rec.onerror = (e) => {
-        if (sessionIdRef.current !== mySession) return
-        if (e.error === 'no-speech') return
-        killVoice('다시 시도해주세요.')
-      }
-      rec.onend = () => {
-        if (sessionIdRef.current !== mySession) return
-        // Android 강제 종료 시 새 recognition 객체로 재시작
-        setTimeout(() => startSession(), 100)
-      }
-      try { rec.start() } catch (_) { killVoice('') }
-    }
-
-    startSession()
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
