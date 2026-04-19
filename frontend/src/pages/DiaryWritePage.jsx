@@ -204,7 +204,7 @@ export default function DiaryWritePage() {
   const voiceTimeoutRef = useRef(null)
   const keepListeningRef = useRef(false)
   const silentRestartRef = useRef(0)  // 무음 재시작 횟수
-  const MAX_SILENT = 3               // 최대 허용 횟수
+  const MAX_SILENT = 2               // 최대 허용 횟수
   const { enabled, speaking, speak, stop, toggle } = useTTS()
 
   const clearVoiceTimeout = () => {
