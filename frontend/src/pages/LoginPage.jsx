@@ -51,7 +51,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="아이디를 입력하세요"
               autoComplete="off"
-              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-4 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-7 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
               required
             />
           </div>
@@ -65,7 +65,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="비밀번호를 입력하세요"
               autoComplete="new-password"
-              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-4 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
+              className="w-full bg-gray-900 border border-gray-700 rounded-md pr-4 py-7 text-lg text-white font-bold placeholder-gray-600 focus:outline-none focus:border-amber-400" style={{paddingLeft: '10px'}}
               required
             />
           </div>
@@ -79,15 +79,15 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-4 text-lg disabled:opacity-40 transition"
+              className="w-full bg-slate-400 hover:bg-slate-300 text-white font-black rounded-md py-7 text-lg disabled:opacity-40 transition"
             >
               {loading ? '로그인 중...' : '로그인'}
             </button>
           </div>
 
-          <p className="text-center text-gray-500 font-bold mt-1">
+          <p className="text-center text-gray-300 font-bold mt-1 text-base">
             계정이 없으신가요?{' '}
-            <Link to="/register" className="text-amber-400 font-black">회원가입</Link>
+            <Link to="/register" className="text-amber-400 font-black text-lg">회원가입</Link>
           </p>
         </form>
 
